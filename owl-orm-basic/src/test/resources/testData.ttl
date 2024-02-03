@@ -1,0 +1,6 @@
+
+
+
+<urn://one> a <urn://example#ExampleClass> ;
+    <urn://name> "Simple Property Value" ;
+    <urn://list> "One" , "Two" , "Three" .
