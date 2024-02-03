@@ -4,16 +4,26 @@ import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.annotations.Property;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConversionException;
+import com.realmone.owl.orm.types.ValueConverter;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class OwlOrmInvocationHandler implements InvocationHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OwlOrmInvocationHandler.class);
 
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
     private final ValueConverterRegistry valueConverterRegistry;
@@ -36,7 +46,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
         if (method.getName().equals("toString")) {
             return this.toString();
         } else {
@@ -61,12 +71,14 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         final Property propertyAnn = method.getDeclaredAnnotation(Property.class);
         final IRI predicate = iri(propertyAnn.value());
         final Class<?> type = propertyAnn.type();
-//        System.out.printf("ORM Property: %s%n\t%s%n", propertyAnn, method);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("ORM Property lookup intercepted: {}\n\t{}", method.getName(), propertyAnn);
+        }
         if (method.getName().startsWith("get")) {
             if (propertyAnn.functional()) {
-                return getFunctionalProperty(predicate, type);
+                return getFunctionalPropertyValue(predicate, type);
             } else {
-
+                return getNonFunctionalPropertyValue(predicate, type);
             }
         }
         return null;
@@ -83,14 +95,18 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         return VALUE_FACTORY.createIRI(value);
     }
 
-    private Optional<Object> getFunctionalProperty(IRI predicate, Class<?> type) {
-        Value value = delegate.getProperty(predicate).orElse(null);
-        Object obj = null;
-        if (value != null) {
-            obj = valueConverterRegistry.getValueConverter(type)
-                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: " + type.getName()))
-                    .convertValue(value);
-        }
-        return Optional.ofNullable(obj);
+    private <T> Optional<T> getFunctionalPropertyValue(IRI predicate, Class<T> type) {
+        ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
+                        + type.getName()));
+        return delegate.getProperty(predicate).map(converter::convertValue);
+    }
+
+    private <T> Set<T> getNonFunctionalPropertyValue(IRI predicate, Class<T> type) {
+        final ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
+                        + type.getName()));
+        return delegate.getProperties(predicate).stream()
+                .map(converter::convertValue).collect(Collectors.toSet());
     }
 }
