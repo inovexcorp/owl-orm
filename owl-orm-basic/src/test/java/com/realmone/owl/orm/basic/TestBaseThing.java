@@ -1,6 +1,6 @@
 package com.realmone.owl.orm.basic;
 
-import com.realmone.owl.orm.basic.types.DefaultValueConverterRegistry;
+import com.realmone.owl.orm.types.DefaultValueConverterRegistry;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;

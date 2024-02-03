@@ -1,8 +1,9 @@
 package com.realmone.owl.orm.basic;
 
-import com.realmone.owl.orm.basic.types.DefaultValueConverterRegistry;
-import com.realmone.owl.orm.basic.types.IRIValueConverter;
-import com.realmone.owl.orm.basic.types.StringValueConverter;
+
+import com.realmone.owl.orm.types.DefaultValueConverterRegistry;
+import com.realmone.owl.orm.types.IRIValueConverter;
+import com.realmone.owl.orm.types.StringValueConverter;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
