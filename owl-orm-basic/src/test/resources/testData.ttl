@@ -3,4 +3,18 @@
 
 <urn://one> a <urn://example#ExampleClass> ;
     <urn://name> "Simple Property Value" ;
-    <urn://list> "One" , "Two" , "Three" .
+    <urn://list> "One" , "Two" , "Three" ;
+    <urn://points.to> <urn://two> ;
+    <urn://multi.points.to> <urn://object.property/1> , <urn://object.property/2> .
+
+<urn://two> a <urn://example#ExampleClass> ;
+    <urn://name> "Another Simple Property Value" ;
+    <urn://list> "Four" , "Five" .
+
+<urn://object.property/1> a <urn://example#ExampleClass> ;
+    <urn://name> "object prop one" ;
+        <urn://list> "X" , "Y" .
+
+<urn://object.property/2> a <urn://example#ExampleClass> ;
+    <urn://name> "object prop two" ;
+        <urn://list> "A" , "B" .

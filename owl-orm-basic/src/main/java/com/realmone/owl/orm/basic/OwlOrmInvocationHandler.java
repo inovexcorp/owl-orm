@@ -1,6 +1,8 @@
 package com.realmone.owl.orm.basic;
 
+import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
+import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Property;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConversionException;
@@ -27,15 +29,19 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
 
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
     private final ValueConverterRegistry valueConverterRegistry;
+    private final ThingFactory thingFactory;
+    private final Model model;
     private final BaseThing delegate;
 
     public OwlOrmInvocationHandler(Resource resource, Class<? extends Thing> type, Model model,
-                                   ValueConverterRegistry valueConverterRegistry) {
+                                   ValueConverterRegistry valueConverterRegistry, ThingFactory factory) {
         Type typeAnn = type.getDeclaredAnnotation(Type.class);
         if (typeAnn == null) {
             throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
         }
         this.valueConverterRegistry = valueConverterRegistry;
+        this.thingFactory = factory;
+        this.model = model;
         this.delegate = BaseThing.builder()
                 .useCreate(false)
                 .useModel(model)
@@ -56,7 +62,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     }
 
     private Optional<Object> useDelegateMethod(Object proxy, Method method, Object[] args) {
-        if (method.getDeclaringClass().equals(Thing.class)) {
+        if (method.getDeclaringClass().equals(Thing.class) || method.getDeclaringClass().equals(Object.class)) {
             try {
                 return Optional.of(method.invoke(delegate, args));
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -95,18 +101,37 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         return VALUE_FACTORY.createIRI(value);
     }
 
+    @SuppressWarnings("unchecked")
     private <T> Optional<T> getFunctionalPropertyValue(IRI predicate, Class<T> type) {
-        ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
-                .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
-                        + type.getName()));
-        return delegate.getProperty(predicate).map(converter::convertValue);
+        if (Thing.class.isAssignableFrom(type)) {
+            ValueConverter<IRI> iriConverter = valueConverterRegistry.getValueConverter(IRI.class)
+                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Converter for IRIs"));
+            return (Optional<T>) delegate.getProperty(predicate).map(iriConverter::convertValue).flatMap(iri ->
+                    thingFactory.get((Class<? extends Thing>) type, iri, delegate.model, valueConverterRegistry));
+        } else {
+            ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
+                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
+                            + type.getName()));
+            return delegate.getProperty(predicate).map(converter::convertValue);
+        }
     }
 
+    @SuppressWarnings("unchecked")
     private <T> Set<T> getNonFunctionalPropertyValue(IRI predicate, Class<T> type) {
-        final ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
-                .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
-                        + type.getName()));
-        return delegate.getProperties(predicate).stream()
-                .map(converter::convertValue).collect(Collectors.toSet());
+        if (Thing.class.isAssignableFrom(type)) {
+            ValueConverter<IRI> converter = valueConverterRegistry.getValueConverter(IRI.class)
+                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Converter for IRIs"));
+            return (Set<T>) delegate.getProperties(predicate).stream().map(converter::convertValue)
+                    .map(iri -> thingFactory.get((Class<? extends Thing>) type, iri, model, valueConverterRegistry)
+                            .orElseThrow(() -> new OrmException("Couldn't get thing for IRI in underlying model: "
+                                    + iri)))
+                    .collect(Collectors.toSet());
+        } else {
+            final ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
+                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
+                            + type.getName()));
+            return delegate.getProperties(predicate).stream()
+                    .map(converter::convertValue).collect(Collectors.toSet());
+        }
     }
 }

@@ -1,7 +1,9 @@
 package com.realmone.owl.orm.basic;
 
 import com.realmone.owl.orm.basic.types.DefaultValueConverterRegistry;
+import com.realmone.owl.orm.basic.types.IRIValueConverter;
 import com.realmone.owl.orm.basic.types.StringValueConverter;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -16,8 +18,9 @@ import org.junit.Test;
 import java.io.FileReader;
 import java.io.Reader;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class TestBaseThingFactory {
+public class TestFactoryAndProxy {
 
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
@@ -26,9 +29,10 @@ public class TestBaseThingFactory {
     @BeforeClass
     public static void initRegistry() {
         VALUE_CONVERTER_REGISTRY.register(String.class, new StringValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(IRI.class, new IRIValueConverter());
     }
 
-    private BaseThingFactory factory = new BaseThingFactory();
+    private BaseThingFactory baseThingFactory = new BaseThingFactory();
 
     private Model model;
 
@@ -41,7 +45,7 @@ public class TestBaseThingFactory {
 
     @Test
     public void testReadFunctional() throws Exception {
-        ExampleClass myThing = factory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model, VALUE_CONVERTER_REGISTRY);
         Assert.assertEquals("Simple Property Value",
                 myThing.getProperty(VALUE_FACTORY.createIRI("urn://name")).orElseThrow().stringValue());
@@ -52,7 +56,7 @@ public class TestBaseThingFactory {
 
     @Test
     public void testReadNonfunctional() throws Exception {
-        ExampleClass myThing = factory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model, VALUE_CONVERTER_REGISTRY);
         Set<Value> values = myThing.getProperties(VALUE_FACTORY.createIRI("urn://list"));
         Assert.assertEquals(3, values.size());
@@ -64,5 +68,30 @@ public class TestBaseThingFactory {
         values.stream().map(Value::stringValue)
                 .forEach(value -> Assert.assertTrue("Expected set values to be contained in method results",
                         data.contains(value)));
+    }
+
+    @Test
+    public void testFunctionalObjectProperty() throws Exception {
+        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model, VALUE_CONVERTER_REGISTRY);
+        IRI otherThing = (IRI) myThing.getProperty(iri("urn://points.to")).orElseThrow();
+        ExampleClass pointedTo = myThing.getPointsTo().orElseThrow();
+        Assert.assertEquals(otherThing, pointedTo.getResource());
+    }
+
+    @Test
+    public void testNonFunctionalObjectProperty() throws Exception {
+        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model, VALUE_CONVERTER_REGISTRY);
+        Set<IRI> iris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        Set<ExampleClass> remoteThings = myThing.getMultiPointsTo();
+        Assert.assertEquals(iris.size(), remoteThings.size());
+        remoteThings.stream().map(ExampleClass::getResource).map(resource -> (IRI) resource)
+                .forEach(resource -> Assert.assertTrue(iris.contains(resource)));
+    }
+
+    private IRI iri(String value) {
+        return VALUE_FACTORY.createIRI(value);
     }
 }
