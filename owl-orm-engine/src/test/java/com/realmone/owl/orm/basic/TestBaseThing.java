@@ -106,4 +106,15 @@ public class TestBaseThing {
         // Two properties and Two TYPE statements.
         Assert.assertEquals(4, model.size());
     }
+
+    @Test(expected = NullPointerException.class)
+    public void badInitialize() {
+        BaseThing.builder()
+                //.useRegistry() // Skipping to trigger our exception from lombok.
+                .useTypeIri(VALUE_FACTORY.createIRI("urn://type"))
+                .useCreate(true)
+                .useResource(VALUE_FACTORY.createIRI("urn://fake"))
+                .useModel(MODEL_FACTORY.createEmptyModel())
+                .build();
+    }
 }

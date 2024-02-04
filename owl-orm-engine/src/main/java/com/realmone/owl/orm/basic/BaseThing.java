@@ -39,7 +39,6 @@ public class BaseThing implements Thing {
      * The IRI of the type of thing we're working with.
      */
     @Getter
-    @NonNull
     protected final IRI typeIri;
 
     /**
@@ -51,20 +50,27 @@ public class BaseThing implements Thing {
     @Getter(AccessLevel.PACKAGE)
     protected boolean detached = false;
 
+
     @Builder(setterPrefix = "use")
-    protected BaseThing(Resource resource, Model model, IRI typeIri, ValueConverterRegistry registry, boolean create) {
+    protected BaseThing(@NonNull Resource resource, @NonNull Model model, @NonNull IRI typeIri,
+                        @NonNull ValueConverterRegistry registry, boolean create) {
         this.resource = resource;
         this.model = model;
         this.typeIri = typeIri;
         this.valueConverterRegistry = registry;
         boolean exists = !model.filter(resource, RDF.TYPE, typeIri).isEmpty();
-        if (!exists && create) {
-            this.model.add(resource, RDF.TYPE, typeIri);
-        } else if (exists && create) {
-            throw new OrmException("Cannot create an instance of '" + typeIri + "' with resource '"
-                    + resource.stringValue() + "' as it already exists in our underlying model");
-        } else if (!exists && !create) {
-            detached = true;
+        if (!exists) {
+            if (create) { // If it doesn't exist and we are creating, add the statement.
+                this.model.add(resource, RDF.TYPE, typeIri);
+            } else { // If it doesn't exist and we are not creating, note that we are detached for the facade...
+                detached = true;
+            }
+        } else {
+            if (create) { // If it exists and we are creating, raise an exception...
+                throw new OrmException("Cannot create an instance of '" + typeIri + "' with resource '"
+                        + resource.stringValue() + "' as it already exists in our underlying model");
+            }
+            // Just get it if it exists!
         }
     }
 

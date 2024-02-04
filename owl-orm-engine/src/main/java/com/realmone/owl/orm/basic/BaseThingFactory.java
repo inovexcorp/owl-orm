@@ -19,10 +19,15 @@ public class BaseThingFactory implements ThingFactory {
 
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
+    private ValueConverterRegistry valueConverterRegistry;
+
+    public BaseThingFactory(ValueConverterRegistry valueConverterRegistry) {
+        this.valueConverterRegistry = valueConverterRegistry;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Thing> T create(Class<T> type, Resource resource,
-                                      Model model, ValueConverterRegistry valueConverterRegistry) {
+    public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         IRI typeIri = VALUE_FACTORY.createIRI(annotation.value());
         OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
@@ -43,8 +48,7 @@ public class BaseThingFactory implements ThingFactory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model,
-                                             ValueConverterRegistry valueConverterRegistry) {
+    public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         IRI typeIri = VALUE_FACTORY.createIRI(annotation.value());
         BaseThing delegate = BaseThing.builder()

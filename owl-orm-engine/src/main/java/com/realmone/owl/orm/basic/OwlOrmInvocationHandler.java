@@ -93,7 +93,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             ValueConverter<IRI> iriConverter = valueConverterRegistry.getValueConverter(IRI.class)
                     .orElseThrow(() -> new IllegalArgumentException("Couldn't find Converter for IRIs"));
             return (Optional<T>) delegate.getProperty(predicate).map(iriConverter::convertValue).flatMap(iri ->
-                    thingFactory.get((Class<? extends Thing>) type, iri, delegate.model, valueConverterRegistry));
+                    thingFactory.get((Class<? extends Thing>) type, iri, delegate.model));
         } else {
             ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
                     .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
@@ -108,7 +108,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             ValueConverter<IRI> converter = valueConverterRegistry.getValueConverter(IRI.class)
                     .orElseThrow(() -> new IllegalArgumentException("Couldn't find Converter for IRIs"));
             return (Set<T>) delegate.getProperties(predicate).stream().map(converter::convertValue)
-                    .map(iri -> thingFactory.get((Class<? extends Thing>) type, iri, model, valueConverterRegistry)
+                    .map(iri -> thingFactory.get((Class<? extends Thing>) type, iri, model)
                             .orElseThrow(() -> new OrmException("Couldn't get thing for IRI in underlying model: "
                                     + iri)))
                     .collect(Collectors.toSet());

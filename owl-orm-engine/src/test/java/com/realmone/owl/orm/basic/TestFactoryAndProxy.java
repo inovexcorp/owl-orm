@@ -1,6 +1,7 @@
 package com.realmone.owl.orm.basic;
 
 
+import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.types.DefaultValueConverterRegistry;
 import com.realmone.owl.orm.types.IRIValueConverter;
 import com.realmone.owl.orm.types.StringValueConverter;
@@ -27,13 +28,13 @@ public class TestFactoryAndProxy {
 
     private static final DefaultValueConverterRegistry VALUE_CONVERTER_REGISTRY = new DefaultValueConverterRegistry();
 
+    private static final ThingFactory THING_FACTORY = new BaseThingFactory(VALUE_CONVERTER_REGISTRY);
+
     @BeforeClass
     public static void initRegistry() {
         VALUE_CONVERTER_REGISTRY.register(String.class, new StringValueConverter());
         VALUE_CONVERTER_REGISTRY.register(IRI.class, new IRIValueConverter());
     }
-
-    private final BaseThingFactory baseThingFactory = new BaseThingFactory();
 
     private Model model;
 
@@ -46,8 +47,8 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testReadFunctional() throws Exception {
-        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
         Assert.assertEquals("Simple Property Value",
                 myThing.getProperty(VALUE_FACTORY.createIRI("urn://name")).orElseThrow().stringValue());
         Assert.assertEquals("OwlOrmInvocationHandler {resource=urn://one type=urn://example#ExampleClass}",
@@ -57,8 +58,8 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testReadNonfunctional() throws Exception {
-        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
         Set<Value> values = myThing.getProperties(VALUE_FACTORY.createIRI("urn://list"));
         Assert.assertEquals(3, values.size());
         Set<String> data = myThing.getList();
@@ -73,8 +74,8 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testFunctionalObjectProperty() throws Exception {
-        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
         IRI otherThing = (IRI) myThing.getProperty(iri("urn://points.to")).orElseThrow();
         ExampleClass pointedTo = myThing.getPointsTo().orElseThrow();
         Assert.assertEquals(otherThing, pointedTo.getResource());
@@ -82,8 +83,8 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testNonFunctionalObjectProperty() throws Exception {
-        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
         Set<IRI> iris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
                 .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
         Set<ExampleClass> remoteThings = myThing.getMultiPointsTo();
