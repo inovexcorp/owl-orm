@@ -1,18 +1,19 @@
 package com.realmone.owl.orm.basic;
 
+import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
+import com.realmone.owl.orm.types.ValueConverter;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Optional;
 import java.util.Set;
 
-@SuperBuilder(setterPrefix = "use")
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseThing implements Thing {
 
     /**
@@ -34,17 +35,38 @@ public class BaseThing implements Thing {
     @NonNull
     protected final Model model;
 
+    /**
+     * The IRI of the type of thing we're working with.
+     */
     @Getter
+    @NonNull
     protected final IRI typeIri;
 
-    @NonNull
-    @Builder.Default
-    protected boolean create = false;
     /**
      * The {@link ValueConverterRegistry} to convert between types.
      */
     @NonNull
     protected final ValueConverterRegistry valueConverterRegistry;
+
+    @Getter(AccessLevel.PACKAGE)
+    protected boolean detached = false;
+
+    @Builder(setterPrefix = "use")
+    protected BaseThing(Resource resource, Model model, IRI typeIri, ValueConverterRegistry registry, boolean create) {
+        this.resource = resource;
+        this.model = model;
+        this.typeIri = typeIri;
+        this.valueConverterRegistry = registry;
+        boolean exists = !model.filter(resource, RDF.TYPE, typeIri).isEmpty();
+        if (!exists && create) {
+            this.model.add(resource, RDF.TYPE, typeIri);
+        } else if (exists && create) {
+            throw new OrmException("Cannot create an instance of '" + typeIri + "' with resource '"
+                    + resource.stringValue() + "' as it already exists in our underlying model");
+        } else if (!exists && !create) {
+            detached = true;
+        }
+    }
 
     /**
      * {@inheritDoc}

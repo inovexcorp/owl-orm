@@ -18,6 +18,7 @@ public class TestBaseThing {
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
     private static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
     private static final DefaultValueConverterRegistry VALUE_CONVERTER_REGISTRY = new DefaultValueConverterRegistry();
+    private static final IRI TYPE_IRI = VALUE_FACTORY.createIRI("urn://type");
 
     @BeforeClass
     public static void initValueConverterRegistry() {
@@ -30,7 +31,9 @@ public class TestBaseThing {
         BaseThing thing = BaseThing.builder()
                 .useModel(MODEL_FACTORY.createEmptyModel())
                 .useResource(thingResource)
-                .useValueConverterRegistry(VALUE_CONVERTER_REGISTRY)
+                .useRegistry(VALUE_CONVERTER_REGISTRY)
+                .useTypeIri(TYPE_IRI)
+                .useCreate(true)
                 .build();
         String testNameValue = "TestBasicThing";
         Assert.assertTrue(thing.addProperty(VALUE_FACTORY.createLiteral(testNameValue),
@@ -39,7 +42,8 @@ public class TestBaseThing {
                 .orElseThrow(() -> new IllegalStateException("Expected the test property to exist"));
         Assert.assertNotNull(val);
         Assert.assertEquals(testNameValue, val.stringValue());
-        Assert.assertEquals("Expected a single statement with our thing", 1, thing.getModel().size());
+        Assert.assertEquals("Expected a single statement with our thing, and a type (2 stmts total)",
+                2, thing.getModel().size());
         Assert.assertEquals(thingResource, thing.getResource());
     }
 
@@ -48,7 +52,9 @@ public class TestBaseThing {
         BaseThing thing = BaseThing.builder()
                 .useModel(MODEL_FACTORY.createEmptyModel())
                 .useResource(VALUE_FACTORY.createIRI("urn://basic.thing"))
-                .useValueConverterRegistry(VALUE_CONVERTER_REGISTRY)
+                .useRegistry(VALUE_CONVERTER_REGISTRY)
+                .useCreate(true)
+                .useTypeIri(TYPE_IRI)
                 .build();
         // Add a list of string values with an arbitrary predicate.
         IRI propertyIri = VALUE_FACTORY.createIRI("urn://list.property");
@@ -61,7 +67,7 @@ public class TestBaseThing {
         strings.forEach(input -> Assert.assertTrue("Output values must contain all values\n\tMissing>: "
                 + input, values.contains(input)));
         Assert.assertEquals("Expected one statement per input string with our thing",
-                strings.size(), thing.getModel().size());
+                strings.size() + 1, thing.getModel().size());
         // Remove one of the strings from the input list and from the associated thing as well.
         String removed = strings.remove(0);
         Assert.assertTrue(thing.removeProperty(VALUE_FACTORY.createLiteral(removed), propertyIri));
@@ -69,8 +75,8 @@ public class TestBaseThing {
         Assert.assertEquals(strings.size(), afterRemovedValues.size());
         strings.forEach(input -> Assert.assertTrue("Output values must contain all values\n\tMissing>: "
                 + input, afterRemovedValues.contains(input)));
-        Assert.assertEquals("Expected one statement per input string with our thing",
-                strings.size(), thing.getModel().size());
+        Assert.assertEquals("Expected one statement per input string with our thing (and a type stmt)",
+                strings.size() + 1, thing.getModel().size());
     }
 
     @Test
@@ -82,17 +88,22 @@ public class TestBaseThing {
         BaseThing thing1 = BaseThing.builder()
                 .useModel(model)
                 .useResource(thingOneIri)
-                .useValueConverterRegistry(VALUE_CONVERTER_REGISTRY)
+                .useTypeIri(TYPE_IRI)
+                .useRegistry(VALUE_CONVERTER_REGISTRY)
+                .useCreate(true)
                 .build();
         Assert.assertTrue(thing1.addProperty(VALUE_FACTORY.createLiteral("one"), predicate));
         BaseThing thing2 = BaseThing.builder()
                 .useModel(model)
+                .useTypeIri(TYPE_IRI)
                 .useResource(thingTwoIri)
-                .useValueConverterRegistry(VALUE_CONVERTER_REGISTRY)
+                .useRegistry(VALUE_CONVERTER_REGISTRY)
+                .useCreate(true)
                 .build();
         Assert.assertTrue(thing2.addProperty(VALUE_FACTORY.createLiteral("two"), predicate));
         Assert.assertEquals(model, thing1.getModel());
         Assert.assertEquals(model, thing2.getModel());
-        Assert.assertEquals(2, model.size());
+        // Two properties and Two TYPE statements.
+        Assert.assertEquals(4, model.size());
     }
 }

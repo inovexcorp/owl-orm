@@ -4,13 +4,12 @@ import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Property;
-import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConversionException;
 import com.realmone.owl.orm.types.ValueConverter;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
+import lombok.Builder;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.slf4j.Logger;
@@ -26,29 +25,20 @@ import java.util.stream.Collectors;
 public class OwlOrmInvocationHandler implements InvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OwlOrmInvocationHandler.class);
-
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
-    private final ValueConverterRegistry valueConverterRegistry;
-    private final ThingFactory thingFactory;
-    private final Model model;
-    private final BaseThing delegate;
 
-    public OwlOrmInvocationHandler(Resource resource, Class<? extends Thing> type, Model model,
-                                   ValueConverterRegistry valueConverterRegistry, ThingFactory factory) {
-        Type typeAnn = type.getDeclaredAnnotation(Type.class);
-        if (typeAnn == null) {
-            throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
-        }
+    private final Model model;
+    private final ThingFactory thingFactory;
+    private final BaseThing delegate;
+    private final ValueConverterRegistry valueConverterRegistry;
+
+    @Builder(setterPrefix = "use")
+    protected OwlOrmInvocationHandler(Model model, BaseThing delegate,
+                                      ValueConverterRegistry valueConverterRegistry, ThingFactory factory) {
+        this.model = model;
+        this.delegate = delegate;
         this.valueConverterRegistry = valueConverterRegistry;
         this.thingFactory = factory;
-        this.model = model;
-        this.delegate = BaseThing.builder()
-                .useCreate(false)
-                .useModel(model)
-                .useResource(resource)
-                .useTypeIri(VALUE_FACTORY.createIRI(typeAnn.value()))
-                .useValueConverterRegistry(valueConverterRegistry)
-                .build();
     }
 
     @Override
@@ -59,6 +49,13 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             Optional<Object> opt = useDelegateMethod(proxy, method, args);
             return opt.orElseGet(() -> intercept(proxy, method, args));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "OwlOrmInvocationHandler {" +
+                "resource=" + delegate.resource.stringValue() +
+                " type=" + delegate.getTypeIri().stringValue() + "}";
     }
 
     private Optional<Object> useDelegateMethod(Object proxy, Method method, Object[] args) {
@@ -88,17 +85,6 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             }
         }
         return null;
-    }
-
-    @Override
-    public String toString() {
-        return "OwlOrmInvocationHandler{" +
-                "resource=" + delegate.resource.stringValue() +
-                " type=" + delegate.getTypeIri().stringValue() + '}';
-    }
-
-    private IRI iri(String value) {
-        return VALUE_FACTORY.createIRI(value);
     }
 
     @SuppressWarnings("unchecked")
@@ -133,5 +119,9 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             return delegate.getProperties(predicate).stream()
                     .map(converter::convertValue).collect(Collectors.toSet());
         }
+    }
+
+    private static IRI iri(String value) {
+        return VALUE_FACTORY.createIRI(value);
     }
 }

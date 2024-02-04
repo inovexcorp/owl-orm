@@ -33,7 +33,7 @@ public class TestFactoryAndProxy {
         VALUE_CONVERTER_REGISTRY.register(IRI.class, new IRIValueConverter());
     }
 
-    private BaseThingFactory baseThingFactory = new BaseThingFactory();
+    private final BaseThingFactory baseThingFactory = new BaseThingFactory();
 
     private Model model;
 
@@ -46,19 +46,19 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testReadFunctional() throws Exception {
-        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY);
+        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
         Assert.assertEquals("Simple Property Value",
                 myThing.getProperty(VALUE_FACTORY.createIRI("urn://name")).orElseThrow().stringValue());
-        Assert.assertEquals("OwlOrmInvocationHandler{resource=urn://one type=urn://example#ExampleClass}",
+        Assert.assertEquals("OwlOrmInvocationHandler {resource=urn://one type=urn://example#ExampleClass}",
                 myThing.toString());
         Assert.assertEquals("Simple Property Value", myThing.getName().orElseThrow());
     }
 
     @Test
     public void testReadNonfunctional() throws Exception {
-        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY);
+        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
         Set<Value> values = myThing.getProperties(VALUE_FACTORY.createIRI("urn://list"));
         Assert.assertEquals(3, values.size());
         Set<String> data = myThing.getList();
@@ -73,8 +73,8 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testFunctionalObjectProperty() throws Exception {
-        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY);
+        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
         IRI otherThing = (IRI) myThing.getProperty(iri("urn://points.to")).orElseThrow();
         ExampleClass pointedTo = myThing.getPointsTo().orElseThrow();
         Assert.assertEquals(otherThing, pointedTo.getResource());
@@ -82,8 +82,8 @@ public class TestFactoryAndProxy {
 
     @Test
     public void testNonFunctionalObjectProperty() throws Exception {
-        ExampleClass myThing = baseThingFactory.create(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
-                model, VALUE_CONVERTER_REGISTRY);
+        ExampleClass myThing = baseThingFactory.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model, VALUE_CONVERTER_REGISTRY).orElseThrow();
         Set<IRI> iris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
                 .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
         Set<ExampleClass> remoteThings = myThing.getMultiPointsTo();
