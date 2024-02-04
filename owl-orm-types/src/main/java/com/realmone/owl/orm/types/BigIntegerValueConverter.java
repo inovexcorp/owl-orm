@@ -12,7 +12,6 @@ import java.math.BigInteger;
  *
  * @author bdgould
  */
-
 public class BigIntegerValueConverter extends AbstractValueConverter<BigInteger> {
 
     /**

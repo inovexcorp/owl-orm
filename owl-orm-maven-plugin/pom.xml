@@ -7,16 +7,12 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>owl-orm-maven-plugin</artifactId>
+    <name>OWL ORM Maven Plugin</name>
+    <description>A maven plugin for generating OWL ORM implementations for configured OWL ontologies</description>
     <packaging>maven-plugin</packaging>
-
-    <name>owl-orm-maven-plugin Maven Plugin</name>
 
     <!-- FIXME change it to the project's website -->
     <url>https://mobi.solutions</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -34,12 +30,6 @@
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
             <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

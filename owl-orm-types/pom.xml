@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>owl-orm-types</artifactId>
+    <name>OWL ORM Type Conversion</name>
+    <description>An implementation of the OWL ORM API for type conversion</description>
     <packaging>bundle</packaging>
 
     <dependencies>

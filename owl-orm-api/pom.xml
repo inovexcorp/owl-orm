@@ -10,7 +10,11 @@
     </parent>
 
     <artifactId>owl-orm-api</artifactId>
+    <name>OWL ORM API</name>
+    <description>A package that describes the interfaces and base logic for an ORM API on top of OWL ontologies
+    </description>
     <packaging>bundle</packaging>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
