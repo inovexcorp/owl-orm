@@ -1,0 +1,469 @@
+
+<https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/description> "The capacity in US fluid ounces.";
+  <http://purl.org/dc/terms/title> "Capacity";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#QuarterBarrel> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Quarter Barrel";
+  <http://purl.org/dc/terms/title> "Quarter Barrel";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4162;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "992.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#BeveledBarrel> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Beveled Barrel";
+  <http://purl.org/dc/terms/title> "Beveled Barrel";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4164;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "992.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#SixthBarrel> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Sixth Barrel";
+  <http://purl.org/dc/terms/title> "Sixth Barrel";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4160;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "661.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#CorneliusKeg> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Cornelius Keg";
+  <http://purl.org/dc/terms/title> "Cornelius Keg";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4159;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "640.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#HalfBarrel> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Half Barrel";
+  <http://purl.org/dc/terms/title> "Half Barrel";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4165;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "1984.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#SlimQuarterBarrel> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Slim Quarter Barrel";
+  <http://purl.org/dc/terms/title> "Slim Quarter Barrel";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4161;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "992.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#MiniKeg> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Mini Keg";
+  <http://purl.org/dc/terms/title> "Mini Keg";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4158;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "169.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#RubberBarrel> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/description> "Rubber Barrel";
+  <http://purl.org/dc/terms/title> "Rubber Barrel";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>,
+    _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4163;
+  <https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> "992.0"@en .
+
+<https://mobi.com/ontologies/4/2018/BierOnto> a <http://www.w3.org/2002/07/owl#Ontology>;
+  <http://purl.org/dc/terms/description> "The Official Mobier Ontology";
+  <http://purl.org/dc/terms/title> "BierOnto";
+  <http://www.w3.org/2002/07/owl#imports> <http://xmlns.com/foaf/0.1/> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Beer> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "Beer" .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Keg> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "Keg";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4149 .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#maxCapacity> a <http://www.w3.org/2002/07/owl#AnnotationProperty>,
+    <http://www.w3.org/2002/07/owl#DatatypeProperty>;
+  <http://purl.org/dc/terms/description> "Maximum capacity a given keg should have.  When  instances of a keg are created, they should have their capacity property set to the value of this annotation on the specific class they are a type of.";
+  <http://purl.org/dc/terms/title> "maxCapacity";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Brewery> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "Brewery";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://xmlns.com/foaf/0.1/Organization> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Daemon> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Resource representing a daemon process reporting pours for Mobier.";
+  <http://www.w3.org/2000/01/rdf-schema#label> "Mobier Daemon" .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#MobierConnection> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Interface description object for how the daemon will talk to the Mobier application";
+  <http://www.w3.org/2000/01/rdf-schema#label> "Mobier Connection" .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "HTTP Interface description for how to talk to Mobier over HTTP.";
+  <http://www.w3.org/2000/01/rdf-schema#label> "Mobier HTTP Connection";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://mobi.com/ontologies/4/2018/BierOnto#MobierConnection> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Pour> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "Pour" .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Sensor> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Shadow representation of a sensor on a monitoring pi.";
+  <http://www.w3.org/2000/01/rdf-schema#label> "Mobier Sensor" .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#Tap> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "Tap" .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#User> a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "User";
+  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://xmlns.com/foaf/0.1/Person> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#alcoholByVolume> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "Alcohol By Volume";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Beer>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#beer> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "beer";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Beer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#beerName> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "beerName";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Beer>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#brewery> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "brewery";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Beer>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Brewery> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#breweryName> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "breweryName";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Brewery>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#connection> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "How the Mobier Daemon will connect with the Mobier application.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Mobier Connection Configuration";
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#MobierConnection> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#currentKeg> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "currentKeg";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Tap>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Keg> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#description> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "Beer Description";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Beer>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#gpioBounceTime> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The number of milliseconds of bounce time to monitor the flow sensor signal.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Sensor>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "GPIO Bounce Time";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#gpioPin> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The pin to monitor for the flow sensor interface";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Sensor>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "GPIO Pin";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#gpioPulsesPerOz> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The number of signal pulses per fluid ounce of flow.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Sensor>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Pulses Per Ounce";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#heartbeatDelay> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The number of seconds between heart beats.  This is when the daemon process and application exchange information other than pours.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Heartbeat Delay";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#heartbeatService> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Endpoint to use to establish heartbeat.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Heartbeat Service";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#host> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The host with which to connect.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Host";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#kegPoured> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "kegPoured";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Keg> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#lastHeartbeat> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The last time a heartbeat operation was performed by this daemon";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Last Heartbeat";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#loopSleep> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The number of milliseconds to sleep in each iteration of the monitoring loop.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Loop Sleep Time";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#minimumPulses> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The minimum number of GPIO pulses to register a real pour.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Minimum Pour Volume";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#onTap> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/description> "Which tap the keg is attached ";
+  <http://purl.org/dc/terms/title> "onTap";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Tap> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#ouncesRemaining> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "Ounces Remaining";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#password> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The password to use when connecting";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Password";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#port> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The port to use when opening the connection.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Port";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pourDuration> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "pourDuration";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#long> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pourReportService> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Endpoint to use to report pours.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Pour Reporting Service";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pourStart> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "pourStart";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pourTimeout> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "The number of seconds of inactivity for a pour to be counted as over.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Pour Timeout";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pourUser> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "pourUser";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#User> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pourVolume> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "pourVolume";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#pulsesRecorded> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/description> "The number of pulses a sensor recorded for a pour.";
+  <http://purl.org/dc/terms/title> "Pulses Recorded";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#registerService> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Endpoint to use to register with mobier.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Registration Service";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#revision> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Revision tracking device.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Revision";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#sensor> a <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Sensor the daemon is monitoring.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Daemon>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Sensor";
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Sensor> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#sensorUsed> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/description> "The sensor that reported this pour.";
+  <http://purl.org/dc/terms/title> "Sensor Used";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Sensor> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#style> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "style";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Beer>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#tap> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "How the Mobier Daemon will connect with the Mobier application.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Sensor>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Mobier Connection Configuration";
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Tap> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#tapID> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "tapID";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Tap>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#tapLastPinged> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "Tap Last Pinged";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Tap>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#tapUsed> a <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+    <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "tapUsed";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#Tap> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#timeKicked> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/title> "timeKicked";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#timeTapped> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/description> "When a keg is tapped";
+  <http://purl.org/dc/terms/title> "timeTapped";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#userID> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/description> "User ID";
+  <http://purl.org/dc/terms/title> "userID";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#User>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#username> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Username to use when connecting.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Username";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#verifySslCert> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Whether or not to validate the SSL certificate from Mobier.";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#MobierHttpConnection>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "Verify SSL Cert";
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<https://mobi.com/ontologies/4/2018/BierOnto#maybeKicked> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+    <http://www.w3.org/2002/07/owl#FunctionalProperty>;
+  <http://purl.org/dc/terms/description> "A simple flag that indicates the system has detected that this keg is likely kicked.";
+  <http://purl.org/dc/terms/title> "maybeKicked";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Keg>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4149 a <http://www.w3.org/2002/07/owl#Class>;
+  <http://purl.org/dc/terms/title> "Keg Restriction";
+  <http://www.w3.org/2002/07/owl#oneOf> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4150 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4150 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#MiniKeg>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4151 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4151 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#CorneliusKeg>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4152 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4152 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#SixthBarrel>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4153 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4153 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#SlimQuarterBarrel>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4154 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4154 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#QuarterBarrel>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4155 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4155 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#RubberBarrel>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4156 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4156 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#BeveledBarrel>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4157 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4157 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>
+    <https://mobi.com/ontologies/4/2018/BierOnto#HalfBarrel>;
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4158 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 169 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4159 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 640 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4160 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 661 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4161 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 992 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4162 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 992 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4163 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 992 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4164 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 992 .
+
+_:genid-3fdcd019352147a7ac94193d7c0e61fc-node1dq4n40s6x4165 a <http://www.w3.org/2002/07/owl#Restriction>;
+  <http://www.w3.org/2002/07/owl#onProperty> <https://mobi.com/ontologies/4/2018/BierOnto#hasCapacity>;
+  <http://www.w3.org/2002/07/owl#qualifiedCardinality> 1984 .
