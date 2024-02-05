@@ -1,34 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.realmone.it</groupId>
-  <artifactId>simple-it</artifactId>
-  <version>1.0-SNAPSHOT</version>
+    <groupId>com.realmone.it</groupId>
+    <artifactId>simple-it</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
-  <description>A simple IT verifying the basic use case.</description>
+    <description>A simple IT verifying the basic use case.</description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-        <executions>
-          <execution>
-            <id>touch</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>touch</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>@project.groupId@</groupId>
+                <artifactId>@project.artifactId@</artifactId>
+                <version>@project.version@</version>
+                <executions>
+                    <execution>
+                        <id>generate-orm</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-orm</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generates>
+                        <ontology>
+                            <ontologyFile>${project.basedir}/BierOnto.ttl</ontologyFile>
+                            <outputPackage>com.realmone.bieronto</outputPackage>
+                            <ontologyName>DC Elements</ontologyName>
+                        </ontology>
+                        <ontology>
+                            <ontologyFile>${project.basedir}/foaf.owl</ontologyFile>
+                            <outputPackage>com.realmone.foaf</outputPackage>
+                            <ontologyName>DC Terms</ontologyName>
+                        </ontology>
+                    </generates>
+                    <references>
+                        <ontology>
+                            <ontologyFile>${project.basedir}/owl.ttl</ontologyFile>
+                            <outputPackage>com.realmone.owl</outputPackage>
+                            <ontologyName>OWL Ontology</ontologyName>
+                        </ontology>
+                        <ontology>
+                            <ontologyFile>${project.basedir}/dcelements_ontology.ttl</ontologyFile>
+                            <outputPackage>com.realmone.dcelements</outputPackage>
+                            <ontologyName>DC Elements</ontologyName>
+                        </ontology>
+                        <ontology>
+                            <ontologyFile>${project.basedir}/dcterms_ontology.ttl</ontologyFile>
+                            <outputPackage>com.realmone.dcterms</outputPackage>
+                            <ontologyName>DC Terms</ontologyName>
+                        </ontology>
+                    </references>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

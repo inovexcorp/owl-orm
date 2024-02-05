@@ -11,8 +11,9 @@
     <modules>
         <module>owl-orm-api</module>
         <module>owl-orm-engine</module>
-        <module>owl-orm-maven-plugin</module>
         <module>owl-orm-types</module>
+        <module>owl-orm-maven-plugin</module>
+        <module>owl-orm-generate</module>
     </modules>
 
     <properties>
