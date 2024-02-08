@@ -6,6 +6,7 @@ import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.types.DefaultValueConverterRegistry;
 import com.realmone.owl.orm.types.IRIValueConverter;
+import com.realmone.owl.orm.types.ResourceValueConverter;
 import com.realmone.owl.orm.types.StringValueConverter;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
@@ -35,6 +36,7 @@ public class TestFactoryAndProxy {
     public static void initRegistry() {
         VALUE_CONVERTER_REGISTRY.register(String.class, new StringValueConverter());
         VALUE_CONVERTER_REGISTRY.register(IRI.class, new IRIValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(Resource.class, new ResourceValueConverter());
     }
 
     private Model model;
@@ -74,12 +76,64 @@ public class TestFactoryAndProxy {
     }
 
     @Test
-    public void testGetFunctionalObject() throws Exception {
+    public void testAddNonfunctionalDatatype() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        String toAdd = "Another thingy-ma-jig";
+        Set<Value> values = myThing.getProperties(VALUE_FACTORY.createIRI("urn://list"));
+        Assert.assertEquals(3, values.size());
+        Assert.assertTrue("Adding to set should be successful!",
+                myThing.addToList(toAdd));
+        Assert.assertEquals("Should have added one statement for the addToList",
+                sizeBefore + 1, model.size());
+        Assert.assertTrue("Data should be returned after adding", myThing.getList().contains(toAdd));
+    }
+
+    @Test(expected = OrmException.class)
+    public void testAddNonfunctionalDatatypeNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"), model)
+                .orElseThrow().addToList(null);
+    }
+
+    @Test
+    public void testRemoveNonfunctionalDatatype() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        int listSizeBefore = myThing.getList().size();
+        Assert.assertFalse("Removing a value that isn't present should return false",
+                myThing.removeFromList("SHOULD BE NOT"));
+        Assert.assertEquals(sizeBefore, model.size());
+        Assert.assertTrue(myThing.removeFromList("One"));
+        Assert.assertEquals(sizeBefore - 1, model.size());
+        Assert.assertEquals(listSizeBefore - 1, myThing.getList().size());
+        Assert.assertFalse(myThing.getList().contains("One"));
+    }
+
+    @Test(expected = OrmException.class)
+    public void testRemoveNonfunctionalDatatypeNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"), model)
+                .orElseThrow().removeFromList(null);
+    }
+
+
+    @Test
+    public void testGetFunctionalObject() {
         ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model).orElseThrow();
         IRI otherThing = (IRI) myThing.getProperty(iri("urn://points.to")).orElseThrow();
         ExampleClass pointedTo = myThing.getPointsTo().orElseThrow();
         Assert.assertEquals(otherThing, pointedTo.getResource());
+    }
+
+    @Test
+    public void testGetFunctionalObjectResource() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        IRI otherThing = (IRI) myThing.getProperty(iri("urn://points.to")).orElseThrow();
+        Resource pointedTo = myThing.getPointsTo_Resource().orElseThrow();
+        Assert.assertEquals(otherThing, pointedTo);
     }
 
     @Test
@@ -196,14 +250,77 @@ public class TestFactoryAndProxy {
     }
 
     @Test
-    public void testSetNonFunctionalObject() {
+    public void testClearOutNonFunctionalDatatype() {
         ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model).orElseThrow();
+        int sizeBefore = model.size();
+        int listSize = myThing.getList().size();
+        Assert.assertTrue(myThing.clearOutList());
+        Assert.assertTrue("Empty set should have cleared list", myThing.getList().isEmpty());
+        Assert.assertEquals(sizeBefore - listSize, model.size());
+    }
+
+    @Test
+    public void testSetNonFunctionalObjectByIRI() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
         Set<IRI> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
                 .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
         Assert.assertFalse("Should have some existing relationships", originalIris.isEmpty());
-        // TODO - set up a set of new linkage objects
+        Set<Resource> newIris = new HashSet<>();
+        newIris.add(iri("urn://random.other/1"));
+        newIris.add(iri("urn://random.other/2"));
+        myThing.setMultiPointsTo_Resource(newIris);
+        Set<ExampleClass> result = myThing.getMultiPointsTo();
+        Assert.assertEquals(newIris.size(), result.size());
+        newIris.forEach(resource -> Assert.assertTrue(result.stream().map(Thing::getResource)
+                .anyMatch(resource::equals)));
+        Assert.assertEquals((sizeBefore - originalIris.size() + newIris.size()), model.size());
     }
+
+    @Test
+    public void testSetNonFunctionalObjectByObject() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        Set<Resource> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        ExampleClass r1 = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://random.other/1"),
+                model).orElseThrow();
+        ExampleClass r2 = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://random.other/2"),
+                model).orElseThrow();
+        Set<ExampleClass> others = new HashSet<>();
+        others.add(r1);
+        others.add(r2);
+        myThing.setMultiPointsTo(others);
+        Assert.assertEquals((sizeBefore - originalIris.size() + others.size()), model.size());
+        Set<ExampleClass> afterSet = myThing.getMultiPointsTo();
+        Set<Resource> afterRes = afterSet.stream().map(Thing::getResource).collect(Collectors.toSet());
+        Set<Resource> inputRes = others.stream().map(Thing::getResource).collect(Collectors.toSet());
+        afterRes.forEach(resource -> Assert.assertTrue(inputRes.contains(resource)));
+        others.stream().map(Thing::getResource).forEach(resource -> {
+            Assert.assertFalse(originalIris.contains(resource));
+        });
+    }
+
+    @Test(expected = OrmException.class)
+    public void testSetNonFunctionalObjectNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow().setMultiPointsTo(null);
+    }
+
+    @Test
+    public void testSetNonFunctionalObjectEmpty() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int size = model.size();
+        Set<Resource> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        myThing.setMultiPointsTo(Collections.emptySet());
+        Assert.assertEquals(size - originalIris.size(), model.size());
+    }
+
 
     @Test
     public void testSetNonFunctionalObjectWithEmpty() {
@@ -224,6 +341,19 @@ public class TestFactoryAndProxy {
                         model).orElseThrow()
                 // Set a multiPointsTo to null to trigger exception.
                 .setMultiPointsTo(null);
+    }
+
+    @Test
+    public void testAddNonFunctionalObjectWithThing() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        Set<Resource> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        ExampleClass r1 = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://random.other/1"),
+                model).orElseThrow();
+        Assert.assertTrue(myThing.addToMultiPointsTo(r1));
+
     }
 
     private static IRI iri(String value) {

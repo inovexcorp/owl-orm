@@ -8,16 +8,19 @@ import org.eclipse.rdf4j.model.Resource;
 import java.util.Optional;
 import java.util.Set;
 
-@Type("urn://example#ExampleClass")
+@Type(ExampleClass.TYPE_IRI)
 public interface ExampleClass extends Thing {
+
+    String TYPE_IRI = "urn://example#ExampleClass";
+    String PREDICATE_NAME = "urn://name";
 
     /*
         Functional datatype property.
      */
-    @Property(value = "urn://name", functional = true, type = String.class)
+    @Property(value = PREDICATE_NAME, functional = true, type = String.class)
     Optional<String> getName();
 
-    @Property(value = "urn://name", functional = true, type = String.class)
+    @Property(value = PREDICATE_NAME, functional = true, type = String.class)
     void setName(String value);
 
     /*
@@ -35,14 +38,17 @@ public interface ExampleClass extends Thing {
     @Property(value = "urn://list", type = String.class)
     boolean removeFromList(String value);
 
+    @Property(value = "urn://list", type = String.class)
+    boolean clearOutList();
+
     /*
         Functional object property...
      */
     @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
     Optional<ExampleClass> getPointsTo();
 
-    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
-    Resource getPointsTo_Resource();
+    @Property(value = "urn://points.to", type = Resource.class, functional = true)
+    Optional<Resource> getPointsTo_Resource();
 
     @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
     void setPointsTo(ExampleClass exampleClass);
@@ -60,11 +66,11 @@ public interface ExampleClass extends Thing {
     void setMultiPointsTo(Set<ExampleClass> data);
 
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
-    void setMultiPointsToResource(Set<Resource> data);
+    void setMultiPointsTo_Resource(Set<Resource> data);
 
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
-    boolean addMultiPointsTo(ExampleClass exampleClass);
+    boolean addToMultiPointsTo(ExampleClass exampleClass);
 
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
-    boolean removeMultiPointsTo(ExampleClass exampleClass);
+    boolean removeFromMultiPointsTo(ExampleClass exampleClass);
 }

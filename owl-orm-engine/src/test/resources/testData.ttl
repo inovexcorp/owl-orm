@@ -23,3 +23,13 @@
 <urn://example.updatePointsTo> a <urn://example#ExampleClass> ;
     <urn://name> "Where we will update our data to point to" ;
         <urn://list> "ONLY ONE" .
+
+
+
+<urn://random.other/1> a <urn://example#ExampleClass> ;
+    <urn://name> "Non-functional object linkage test 1" ;
+    <urn://list> "A" , "B" .
+
+<urn://random.other/2> a <urn://example#ExampleClass> ;
+    <urn://name> "Non-functional object linkage test 2" ;
+    <urn://list> "C" , "D" .

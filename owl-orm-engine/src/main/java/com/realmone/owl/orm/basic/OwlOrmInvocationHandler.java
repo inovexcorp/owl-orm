@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +26,13 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OwlOrmInvocationHandler.class);
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
+
+    private static final String GET_PREFIX = "get";
+    private static final String IS_PREFIX = "is";
+    private static final String SET_PREFIX = "set";
+    private static final String ADDTO_PREFIX = "addTo";
+    private static final String REMOVEFROM_PREFIX = "removeFrom";
+    private static final String CLEAROUT_PREFIX = "clearOut";
 
     private final Model model;
     private final ThingFactory thingFactory;
@@ -117,20 +126,23 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             if (propertyAnn.functional()) {
                 setFunctionalPropertyValue(predicate, type, args);
             } else {
-                //TODO
                 setNonFunctionalPropertyValue(predicate, type, args);
             }
             // Normal modifiers are of void return types.
             return null;
         }
-        // Else if we're working on a non-functional add/remove method.
+        // Else if we're working on a non-functional add/remove/clear method.
         else if (isNonFunctionalAddRemove(method, args)) {
             // Raise exception if we're operating on top of a functional property...
             if (propertyAnn.functional()) {
                 throw new OrmException("Cannot overlay an add/remove method on a functional property\n\t"
                         + method.getName() + " - " + this);
             } else {
-                //TODO
+                if (method.getName().startsWith(CLEAROUT_PREFIX)) {
+                    return this.delegate.clearProperty(predicate);
+                } else {
+                    return addRemove(method.getName().startsWith(ADDTO_PREFIX), type, args[0], predicate);
+                }
             }
         }
         // Else it is unclear what type of method we're intercepting... raise an exception!
@@ -138,61 +150,76 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             throw new OrmException("Issue proxying unexpected method call: " + method.getName()
                     + "\n\tOn type: " + this);
         }
-        return null;
     }
+
+    private <T> boolean addRemove(boolean add, Class<T> type, Object parameter, IRI predicate) throws OrmException {
+        if (parameter != null) {
+            // Object property
+            if (Thing.class.isAssignableFrom(type)) {
+
+                return false;
+            } else {
+                try {
+                    Value value = getRequiredValueConverter(type).convertType(type.cast(parameter));
+                    return add ? delegate.addProperty(value, predicate) : delegate.removeProperty(value, predicate);
+                } catch (ClassCastException e) {
+                    throw new OrmException(String.format("Issue adding/removing property '%s' from object " +
+                            "of type: %s", predicate, this), e);
+                }
+            }
+        } else {
+            throw new OrmException("Null value cannot be added or removed from a non-functional property");
+        }
+    }
+
 
     private boolean isNormalAccessor(Method m, Object[] args) {
         //TODO - validate assumptions...
         String name = m.getName();
-        return (name.startsWith("get") || name.startsWith("is"))
+        return (name.startsWith(GET_PREFIX) || name.startsWith(IS_PREFIX))
                 && argsEmpty(args);
     }
 
     private boolean isNormalModifier(Method m, Object[] args) {
         //TODO - validate assumptions...
         String name = m.getName();
-        return name.startsWith("set") && !argsEmpty(args);
+        return name.startsWith(SET_PREFIX) && !argsEmpty(args);
     }
 
     private boolean isNonFunctionalAddRemove(Method m, Object[] args) {
+        //TODO - validate assumptions...
         String name = m.getName();
-        return (name.startsWith("add") || name.startsWith("remove")) && !argsEmpty(args);
+        return ((name.startsWith(ADDTO_PREFIX) || name.startsWith(REMOVEFROM_PREFIX))
+                && !argsEmpty(args)) || (name.startsWith(CLEAROUT_PREFIX) && argsEmpty(args));
     }
 
     @SuppressWarnings("unchecked")
     private <T> Optional<T> getFunctionalPropertyValue(IRI predicate, Class<T> type) {
         // If it's an object property; and the destination type is a Thing implementation.
         if (Thing.class.isAssignableFrom(type)) {
-            ValueConverter<IRI> iriConverter = valueConverterRegistry.getValueConverter(IRI.class)
-                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Converter for IRIs"));
-            return (Optional<T>) delegate.getProperty(predicate).map(iriConverter::convertValue).flatMap(iri ->
-                    thingFactory.get((Class<? extends Thing>) type, iri, delegate.getModel()));
+            // TODO - maybe pull this converter into a field?
+            return (Optional<T>) delegate.getProperty(predicate)
+                    .map(getRequiredValueConverter(IRI.class)::convertValue)
+                    .flatMap(iri -> thingFactory.get((Class<? extends Thing>) type, iri, delegate.getModel()));
         }
         // Else it's a datatype property, look for the appropriate converter.
         else {
-            ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
-                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
-                            + type.getName()));
-            return delegate.getProperty(predicate).map(converter::convertValue);
+            return delegate.getProperty(predicate).map(getRequiredValueConverter(type)::convertValue);
         }
     }
 
     @SuppressWarnings("unchecked")
     private <T> Set<T> getNonFunctionalPropertyValue(IRI predicate, Class<T> type) {
         if (Thing.class.isAssignableFrom(type)) {
-            ValueConverter<IRI> converter = valueConverterRegistry.getValueConverter(IRI.class)
-                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Converter for IRIs"));
-            return (Set<T>) delegate.getProperties(predicate).stream().map(converter::convertValue)
+            return (Set<T>) delegate.getProperties(predicate).stream()
+                    .map(getRequiredValueConverter(IRI.class)::convertValue)
                     .map(iri -> thingFactory.get((Class<? extends Thing>) type, iri, delegate.getModel())
                             .orElseThrow(() -> new OrmException("Couldn't get thing for IRI in underlying model: "
                                     + iri)))
                     .collect(Collectors.toSet());
         } else {
-            final ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
-                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
-                            + type.getName()));
             return delegate.getProperties(predicate).stream()
-                    .map(converter::convertValue).collect(Collectors.toSet());
+                    .map(getRequiredValueConverter(type)::convertValue).collect(Collectors.toSet());
         }
     }
 
@@ -224,69 +251,77 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             }
             // Else try and convert the value and set the property in the delegate.
             else {
-                ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
-                        .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
-                                + type.getName()));
-                delegate.setProperty(converter.convertType(value), predicate);
+                delegate.setProperty(getRequiredValueConverter(type).convertType(value), predicate);
             }
         }
     }
 
     private <T> void setNonFunctionalPropertyValue(IRI predicate, Class<T> type, Object[] args) {
         if (args[0] instanceof Set<?> setArgument) {
+            // If the set is empty...
             if (setArgument.isEmpty()) {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Empty set passed into '{}' for object: {}", predicate.stringValue(), this);
                 }
                 this.delegate.clearProperty(predicate);
-            } else {
+            }
+            // Else the set has stuff in it!
+            else {
                 // Our method is working with an Object Property
                 if (Thing.class.isAssignableFrom(type)) {
-                    final Object sample = setArgument.stream().findFirst()
-                            .orElseThrow(() -> new OrmException("Unexpected issue, couldn't get elements of a set when " +
-                                    "setting a non-functional object property for sampling"));
-                    // If the arg is a resource, then we'll set it directly
-                    if (sample instanceof Resource resource) {
-                        // Convert the incoming set to a set of resources
-                        delegate.setProperties(setArgument.stream().map(entry -> cast(Resource.class, entry))
-                                        .collect(Collectors.toSet()),
-                                predicate);
-                    }
-                    // Otherwise if the arg is a Thing, and should go through the delegate layer.
-                    else if (Thing.class.isAssignableFrom(sample.getClass())) {
-                        delegate.setProperties(setArgument.stream()
-                                        .map(entry -> cast(Thing.class, entry))
-                                        .map(thing -> {
-                                            // Add all the things models to our delegate model
-                                            delegate.getModel().addAll(thing.getModel());
-                                            // Map to a resource for the thing
-                                            return thing.getResource();
-                                        }).collect(Collectors.toSet()),
-                                predicate);
-                    }
-                    // Else we don't know how to handle the argument that was passed in!
-                    else {
-                        throw new OrmException(String.format("Cannot set a functional property value on '%s' to a " +
-                                "type (%s): %s", this, args[0].getClass().getName(), args[0]));
-                    }
+                    handleSettingNonfunctionalObjectProperty(setArgument, predicate, args[0]);
                 }
                 // Else we're working with a data type property.
                 else {
-                    ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
-                            .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
-                                    + type.getName()));
                     Set<Value> data = setArgument.stream()
                             .map(entry -> cast(type, entry))
-                            .map(converter::convertType)
+                            .map(getRequiredValueConverter(type)::convertType)
                             .collect(Collectors.toSet());
                     delegate.setProperties(data, predicate);
                 }
             }
-
-
-        } else {
+        }
+        // Else it's a non-set type, so we should raise an exception.
+        else {
+            // Null parameters will land here too...
             throw new OrmException("Setting non functional property value requires usage of a java.util.Set argument");
         }
+    }
+
+    private void handleSettingNonfunctionalObjectProperty(Set<?> setArgument, IRI predicate, Object arg) {
+        final Object sample = setArgument.stream().findFirst()
+                .orElseThrow(() -> new OrmException("Unexpected issue, couldn't get elements of a set when " +
+                        "setting a non-functional object property for sampling"));
+        // If the arg is a resource, then we'll set it directly
+        if (sample instanceof Resource) {
+            // Convert the incoming set to a set of resources
+            delegate.setProperties(setArgument.stream().map(entry -> cast(Resource.class, entry))
+                            .collect(Collectors.toSet()),
+                    predicate);
+        }
+        // Otherwise if the arg is a Thing, and should go through the delegate layer.
+        else if (Thing.class.isAssignableFrom(sample.getClass())) {
+            delegate.setProperties(setArgument.stream()
+                            .map(entry -> cast(Thing.class, entry))
+                            .map(thing -> {
+                                // Add all the things models to our delegate model
+                                delegate.getModel().addAll(thing.getModel());
+                                // Map to a resource for the thing
+                                return thing.getResource();
+                            }).collect(Collectors.toSet()),
+                    predicate);
+        }
+        // Else we don't know how to handle the argument that was passed in!
+        else {
+            throw new OrmException(String.format("Cannot set a functional property value on '%s' to a " +
+                    "type (%s): %s", this, arg.getClass().getName(), arg));
+        }
+    }
+
+    private <T> ValueConverter<T> getRequiredValueConverter(Class<T> type) {
+        return valueConverterRegistry.getValueConverter(type)
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
+                        + type.getName()));
     }
 
     private static <T> T cast(Class<T> type, Object obj) {
