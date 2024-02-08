@@ -10,7 +10,6 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.lang.reflect.Proxy;
 import java.util.Optional;

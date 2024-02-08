@@ -3,6 +3,7 @@ package com.realmone.owl.orm.basic;
 import com.realmone.owl.orm.annotations.Property;
 import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.annotations.Type;
+import org.eclipse.rdf4j.model.Resource;
 
 import java.util.Optional;
 import java.util.Set;
@@ -26,19 +27,28 @@ public interface ExampleClass extends Thing {
     Set<String> getList();
 
     @Property(value = "urn://list", type = String.class)
-    Set<String> setList();
+    void setList(Set<String> list);
 
     @Property(value = "urn://list", type = String.class)
-    boolean addList(String value);
+    boolean addToList(String value);
 
     @Property(value = "urn://list", type = String.class)
-    boolean removeList(String value);
+    boolean removeFromList(String value);
 
     /*
-        Functional object property... TODO
+        Functional object property...
      */
     @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
     Optional<ExampleClass> getPointsTo();
+
+    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
+    Resource getPointsTo_Resource();
+
+    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
+    void setPointsTo(ExampleClass exampleClass);
+
+    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
+    void setPointsTo_Resource(Resource resource);
 
     /*
         Non-functional object property...
@@ -48,6 +58,9 @@ public interface ExampleClass extends Thing {
 
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
     void setMultiPointsTo(Set<ExampleClass> data);
+
+    @Property(value = "urn://multi.points.to", type = ExampleClass.class)
+    void setMultiPointsToResource(Set<Resource> data);
 
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
     boolean addMultiPointsTo(ExampleClass exampleClass);

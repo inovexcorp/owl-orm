@@ -18,3 +18,8 @@
 <urn://object.property/2> a <urn://example#ExampleClass> ;
     <urn://name> "object prop two" ;
         <urn://list> "A" , "B" .
+
+
+<urn://example.updatePointsTo> a <urn://example#ExampleClass> ;
+    <urn://name> "Where we will update our data to point to" ;
+        <urn://list> "ONLY ONE" .
