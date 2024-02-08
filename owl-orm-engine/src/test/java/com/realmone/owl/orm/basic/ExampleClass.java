@@ -53,7 +53,7 @@ public interface ExampleClass extends Thing {
     @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
     void setPointsTo(ExampleClass exampleClass);
 
-    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
+    @Property(value = "urn://points.to", type = Resource.class, functional = true)
     void setPointsTo_Resource(Resource resource);
 
     /*
@@ -65,12 +65,18 @@ public interface ExampleClass extends Thing {
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
     void setMultiPointsTo(Set<ExampleClass> data);
 
-    @Property(value = "urn://multi.points.to", type = ExampleClass.class)
+    @Property(value = "urn://multi.points.to", type = Resource.class)
     void setMultiPointsTo_Resource(Set<Resource> data);
 
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
     boolean addToMultiPointsTo(ExampleClass exampleClass);
 
+    @Property(value = "urn://multi.points.to", type = Resource.class)
+    boolean addToMultiPointsTo_Resource(Resource exampleClass);
+
     @Property(value = "urn://multi.points.to", type = ExampleClass.class)
     boolean removeFromMultiPointsTo(ExampleClass exampleClass);
+
+    @Property(value = "urn://multi.points.to", type = Resource.class)
+    boolean removeFromMultiPointsTo_Resource(Resource exampleClass);
 }

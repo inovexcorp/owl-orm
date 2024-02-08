@@ -12,10 +12,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.FileReader;
 import java.io.Reader;
@@ -49,7 +46,7 @@ public class TestFactoryAndProxy {
     }
 
     @Test
-    public void testGetFunctionalDatatype() throws Exception {
+    public void testGetFunctionalDatatype() {
         ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model).orElseThrow();
         Assert.assertEquals("Simple Property Value",
@@ -60,7 +57,7 @@ public class TestFactoryAndProxy {
     }
 
     @Test
-    public void testGetNonfunctionalDatatype() throws Exception {
+    public void testGetNonfunctionalDatatype() {
         ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model).orElseThrow();
         Set<Value> values = myThing.getProperties(VALUE_FACTORY.createIRI("urn://list"));
@@ -137,7 +134,7 @@ public class TestFactoryAndProxy {
     }
 
     @Test
-    public void testGetNonFunctionalObject() throws Exception {
+    public void testGetNonFunctionalObject() {
         ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model).orElseThrow();
         Set<IRI> iris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
@@ -353,7 +350,79 @@ public class TestFactoryAndProxy {
         ExampleClass r1 = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://random.other/1"),
                 model).orElseThrow();
         Assert.assertTrue(myThing.addToMultiPointsTo(r1));
+        Assert.assertEquals(sizeBefore + 1, model.size());
+        Assert.assertTrue(myThing.getMultiPointsTo().stream().map(Thing::getResource)
+                .anyMatch(r1.getResource()::equals));
+    }
 
+    @Test(expected = OrmException.class)
+    public void testAddNonFunctionalObjectWithThingNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow().addToMultiPointsTo(null);
+    }
+
+    @Test
+    public void testAddNonFunctionalObjectWithResource() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        Set<Resource> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        Resource r1 = VALUE_FACTORY.createIRI("urn://random.other/1");
+        Assert.assertTrue(myThing.addToMultiPointsTo_Resource(r1));
+        // Second add will be a noop and return false.
+        Assert.assertFalse(myThing.addToMultiPointsTo_Resource(r1));
+        Assert.assertEquals(sizeBefore + 1, model.size());
+        Assert.assertTrue(myThing.getProperties(iri("urn://multi.points.to")).contains(r1));
+        Assert.assertEquals(originalIris.size() + 1, myThing.getMultiPointsTo().size());
+    }
+
+    @Test(expected = OrmException.class)
+    public void testAddNonFunctionalObjectWithResourceNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow().addToMultiPointsTo_Resource(null);
+    }
+
+    @Test
+    public void testRemoveNonFunctionalObjectWithThing() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        ExampleClass r1 = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://object.property/1"),
+                model).orElseThrow();
+        Assert.assertTrue(myThing.removeFromMultiPointsTo(r1));
+        Assert.assertEquals(sizeBefore - 1, model.size());
+        Assert.assertFalse(myThing.getMultiPointsTo().stream().map(Thing::getResource)
+                .anyMatch(r1.getResource()::equals));
+    }
+
+    @Test(expected = OrmException.class)
+    public void testRemoveNonFunctionalObjectWithThingNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow().removeFromMultiPointsTo(null);
+    }
+
+    @Test
+    public void testRemoveNonFunctionalObjectWithResource() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        Set<Resource> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        Resource r1 = VALUE_FACTORY.createIRI("urn://object.property/1");
+        Assert.assertTrue(myThing.getProperties(iri("urn://multi.points.to")).contains(r1));
+        Assert.assertTrue(myThing.removeFromMultiPointsTo_Resource(r1));
+        // Second add will be a noop and return false.
+        Assert.assertFalse(myThing.removeFromMultiPointsTo_Resource(r1));
+        Assert.assertEquals(sizeBefore - 1, model.size());
+        Assert.assertFalse(myThing.getProperties(iri("urn://multi.points.to")).contains(r1));
+        Assert.assertEquals(originalIris.size() - 1, myThing.getMultiPointsTo().size());
+    }
+
+    @Test(expected = OrmException.class)
+    public void testRemoveNonFunctionalObjectWithResourceNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow().removeFromMultiPointsTo_Resource(null);
     }
 
     private static IRI iri(String value) {

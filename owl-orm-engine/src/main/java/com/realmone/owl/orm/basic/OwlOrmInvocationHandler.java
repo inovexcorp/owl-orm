@@ -156,8 +156,13 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         if (parameter != null) {
             // Object property
             if (Thing.class.isAssignableFrom(type)) {
-
-                return false;
+                final Thing paramThing = ((Thing) parameter);
+                final boolean modified = add ? delegate.addProperty(paramThing.getResource(), predicate)
+                        : delegate.removeProperty(paramThing.getResource(), predicate);
+                if (modified && add) {
+                    model.addAll(paramThing.getModel());
+                }
+                return modified;
             } else {
                 try {
                     Value value = getRequiredValueConverter(type).convertType(type.cast(parameter));
