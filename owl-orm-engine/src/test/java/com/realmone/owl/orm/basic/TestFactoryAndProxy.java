@@ -1,6 +1,7 @@
 package com.realmone.owl.orm.basic;
 
 
+import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.types.DefaultValueConverterRegistry;
@@ -192,6 +193,37 @@ public class TestFactoryAndProxy {
         myThing.setList(Collections.emptySet());
         Assert.assertTrue("Empty set should have cleared list", myThing.getList().isEmpty());
         Assert.assertEquals(sizeBefore - listSize, model.size());
+    }
+
+    @Test
+    public void testSetNonFunctionalObject() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        Set<IRI> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        Assert.assertFalse("Should have some existing relationships", originalIris.isEmpty());
+        // TODO - set up a set of new linkage objects
+    }
+
+    @Test
+    public void testSetNonFunctionalObjectWithEmpty() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int size = model.size();
+        Set<IRI> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        Assert.assertFalse("Should have some existing relationships", originalIris.isEmpty());
+        myThing.setMultiPointsTo(Collections.emptySet());
+        Assert.assertTrue(myThing.getMultiPointsTo().isEmpty());
+        Assert.assertEquals(size - originalIris.size(), model.size());
+    }
+
+    @Test(expected = OrmException.class)
+    public void testSetNonFunctionalObjectWithNull() {
+        THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                        model).orElseThrow()
+                // Set a multiPointsTo to null to trigger exception.
+                .setMultiPointsTo(null);
     }
 
     private static IRI iri(String value) {

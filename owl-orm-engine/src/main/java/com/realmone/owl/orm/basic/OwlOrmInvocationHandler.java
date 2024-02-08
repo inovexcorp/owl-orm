@@ -218,9 +218,12 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         // Else it's a datatype property.
         else {
             T value = type.cast(args[0]);
+            // If the value is null, we should clear the property.
             if (value == null) {
                 delegate.clearProperty(predicate);
-            } else {
+            }
+            // Else try and convert the value and set the property in the delegate.
+            else {
                 ValueConverter<T> converter = valueConverterRegistry.getValueConverter(type)
                         .orElseThrow(() -> new IllegalArgumentException("Couldn't find Value Converter for type: "
                                 + type.getName()));
@@ -239,18 +242,27 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             } else {
                 // Our method is working with an Object Property
                 if (Thing.class.isAssignableFrom(type)) {
-
-                    //TODO - handle setting non-functional Object Properties.
-
+                    final Object sample = setArgument.stream().findFirst()
+                            .orElseThrow(() -> new OrmException("Unexpected issue, couldn't get elements of a set when " +
+                                    "setting a non-functional object property for sampling"));
                     // If the arg is a resource, then we'll set it directly
-                    if (args[0] instanceof Resource resource) {
-                        delegate.setProperty(resource, predicate);
+                    if (sample instanceof Resource resource) {
+                        // Convert the incoming set to a set of resources
+                        delegate.setProperties(setArgument.stream().map(entry -> cast(Resource.class, entry))
+                                        .collect(Collectors.toSet()),
+                                predicate);
                     }
                     // Otherwise if the arg is a Thing, and should go through the delegate layer.
-                    else if (Thing.class.isAssignableFrom(args[0].getClass())) {
-                        Thing value = (Thing) args[0];
-                        delegate.getModel().addAll(value.getModel().filter(value.getResource(), null, null));
-                        delegate.setProperty(value.getResource(), predicate);
+                    else if (Thing.class.isAssignableFrom(sample.getClass())) {
+                        delegate.setProperties(setArgument.stream()
+                                        .map(entry -> cast(Thing.class, entry))
+                                        .map(thing -> {
+                                            // Add all the things models to our delegate model
+                                            delegate.getModel().addAll(thing.getModel());
+                                            // Map to a resource for the thing
+                                            return thing.getResource();
+                                        }).collect(Collectors.toSet()),
+                                predicate);
                     }
                     // Else we don't know how to handle the argument that was passed in!
                     else {
