@@ -13,6 +13,9 @@ public interface ExampleClass extends Thing {
 
     String TYPE_IRI = "urn://example#ExampleClass";
     String PREDICATE_NAME = "urn://name";
+    String PREDICATE_LIST = "urn://list";
+    String PREDICATE_POINTSTO = "urn://points.to";
+    String PREDICATE_MULTIPOINTSTO = "urn://multi.points.to";
 
     /*
         Functional datatype property.
@@ -26,57 +29,60 @@ public interface ExampleClass extends Thing {
     /*
         Non-functional datatype property.
      */
-    @Property(value = "urn://list", type = String.class)
+    @Property(value = PREDICATE_LIST, type = String.class)
     Set<String> getList();
 
-    @Property(value = "urn://list", type = String.class)
+    @Property(value = PREDICATE_LIST, type = String.class)
     void setList(Set<String> list);
 
-    @Property(value = "urn://list", type = String.class)
+    @Property(value = PREDICATE_LIST, type = String.class)
     boolean addToList(String value);
 
-    @Property(value = "urn://list", type = String.class)
+    @Property(value = PREDICATE_LIST, type = String.class)
     boolean removeFromList(String value);
 
-    @Property(value = "urn://list", type = String.class)
+    @Property(value = PREDICATE_LIST, type = String.class)
     boolean clearOutList();
 
     /*
         Functional object property...
      */
-    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
+    @Property(value = PREDICATE_POINTSTO, type = ExampleClass.class, functional = true)
     Optional<ExampleClass> getPointsTo();
 
-    @Property(value = "urn://points.to", type = Resource.class, functional = true)
+    @Property(value = PREDICATE_POINTSTO, type = Resource.class, functional = true)
     Optional<Resource> getPointsTo_Resource();
 
-    @Property(value = "urn://points.to", type = ExampleClass.class, functional = true)
+    @Property(value = PREDICATE_POINTSTO, type = ExampleClass.class, functional = true)
     void setPointsTo(ExampleClass exampleClass);
 
-    @Property(value = "urn://points.to", type = Resource.class, functional = true)
+    @Property(value = PREDICATE_POINTSTO, type = Resource.class, functional = true)
     void setPointsTo_Resource(Resource resource);
 
     /*
         Non-functional object property...
      */
-    @Property(value = "urn://multi.points.to", type = ExampleClass.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = ExampleClass.class)
     Set<ExampleClass> getMultiPointsTo();
 
-    @Property(value = "urn://multi.points.to", type = ExampleClass.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = ExampleClass.class)
     void setMultiPointsTo(Set<ExampleClass> data);
 
-    @Property(value = "urn://multi.points.to", type = Resource.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = Resource.class)
     void setMultiPointsTo_Resource(Set<Resource> data);
 
-    @Property(value = "urn://multi.points.to", type = ExampleClass.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = ExampleClass.class)
     boolean addToMultiPointsTo(ExampleClass exampleClass);
 
-    @Property(value = "urn://multi.points.to", type = Resource.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = Resource.class)
     boolean addToMultiPointsTo_Resource(Resource exampleClass);
 
-    @Property(value = "urn://multi.points.to", type = ExampleClass.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = ExampleClass.class)
     boolean removeFromMultiPointsTo(ExampleClass exampleClass);
 
-    @Property(value = "urn://multi.points.to", type = Resource.class)
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = Resource.class)
     boolean removeFromMultiPointsTo_Resource(Resource exampleClass);
+
+    @Property(value = PREDICATE_MULTIPOINTSTO, type = ExampleClass.class)
+    boolean clearOutMultiPointsTo();
 }

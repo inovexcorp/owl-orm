@@ -254,6 +254,7 @@ public class TestFactoryAndProxy {
         int listSize = myThing.getList().size();
         Assert.assertTrue(myThing.clearOutList());
         Assert.assertTrue("Empty set should have cleared list", myThing.getList().isEmpty());
+        Assert.assertFalse(myThing.clearOutList());
         Assert.assertEquals(sizeBefore - listSize, model.size());
     }
 
@@ -423,6 +424,20 @@ public class TestFactoryAndProxy {
     public void testRemoveNonFunctionalObjectWithResourceNull() {
         THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
                 model).orElseThrow().removeFromMultiPointsTo_Resource(null);
+    }
+
+    @Test
+    public void testClearOutNonFunctionalObject() {
+        ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"),
+                model).orElseThrow();
+        int sizeBefore = model.size();
+        Set<Resource> originalIris = myThing.getProperties(iri("urn://multi.points.to")).stream().map(Value::stringValue)
+                .map(VALUE_FACTORY::createIRI).collect(Collectors.toSet());
+        Assert.assertTrue(myThing.clearOutMultiPointsTo());
+        Assert.assertTrue(myThing.getMultiPointsTo().isEmpty());
+        Assert.assertEquals(sizeBefore - originalIris.size(), model.size());
+        Assert.assertFalse(myThing.clearOutMultiPointsTo());
+        Assert.assertEquals(sizeBefore - originalIris.size(), model.size());
     }
 
     private static IRI iri(String value) {
