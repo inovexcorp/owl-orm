@@ -21,9 +21,8 @@ public class TestSourceGenerator {
 
 
     @Test
-    public void test() {
+    public void testGenerate() {
         // Create our request objects.
-
         Set<OntologyMeta> generate = singletonSet(OntologyMeta.builder()
                 .file(new File("src/test/resources/BierOnto.ttl").getAbsolutePath())
                 .ontologyName("BierOnto")
@@ -39,8 +38,27 @@ public class TestSourceGenerator {
                 .generateForOntologies(generate)
                 .referenceOntologies(reference)
                 .outputLocation("target/source-gen-test")
+                .enforceFullClosure(true)
                 .build();
         gen.run();
+    }
+
+    @Test(expected = OrmGenerationException.class)
+    public void testMissingClosure() {
+        /*
+        BierOnto imports foaf, but we're not passing it in.  Generation should fail fast.
+         */
+        Set<OntologyMeta> generate = singletonSet(OntologyMeta.builder()
+                .file(new File("src/test/resources/BierOnto.ttl").getAbsolutePath())
+                .ontologyName("BierOnto")
+                .packageName("com.realmone.bieronto")
+                .build());
+        SourceGenerator.builder()
+                .enforceFullClosure(true)
+                .outputLocation("target/")
+                .generateForOntologies(generate)
+                .referenceOntologies(Collections.emptySet())
+                .build();
     }
 
     private Set<OntologyMeta> singletonSet(OntologyMeta wrapper) {

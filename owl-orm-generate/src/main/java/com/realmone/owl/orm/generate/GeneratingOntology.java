@@ -10,13 +10,15 @@ import com.sun.codemodel.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
 import java.io.IOException;
@@ -24,10 +26,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class Ontology {
+public class GeneratingOntology {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeneratingOntology.class);
     private static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
 
     @Getter
@@ -35,7 +37,7 @@ public class Ontology {
     @Getter
     private final Map<Resource, JDefinedClass> classIndex = new HashMap<>();
     @Getter
-    private final Resource resource;
+    private final Resource ontologyResource;
     @Getter
     private final Set<Resource> imports = new HashSet<>();
     @Getter
@@ -54,16 +56,28 @@ public class Ontology {
     private final ClosureIndex closureIndex;
 
     @Builder(setterPrefix = "use")
-    public Ontology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
-                    @NonNull Model referenceModel, @NonNull String ontologyName,
-                    @NonNull String ontologyPackage, @NonNull ClosureIndex closureIndex) throws OrmException {
+    public GeneratingOntology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
+                              @NonNull Model referenceModel, @NonNull String ontologyName,
+                              @NonNull String ontologyPackage, @NonNull ClosureIndex closureIndex,
+                              Boolean enforceFullClosure) throws OrmException {
         this.jPackage = codeModel._package(ontologyPackage);
         this.closureIndex = closureIndex;
         this.model = ontologyModel;
-        this.resource = getOntologyResource(model, ontologyName);
+        this.ontologyResource = getOntologyResource(model, ontologyName);
         this.closureModel = MODEL_FACTORY.createEmptyModel();
         closureModel.addAll(ontologyModel);
         closureModel.addAll(referenceModel);
+        Set<Resource> missingOntologies = GraphUtils.missingOntologies(closureModel, ontologyResource);
+        if (!missingOntologies.isEmpty()) {
+            if (enforceFullClosure == null || enforceFullClosure) {
+                throw new OrmGenerationException(String.format("Ontology %s is missing import(s): %s",
+                        ontologyResource.stringValue(), StringUtils.join(missingOntologies, ", ")));
+            } else if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn(String.format("Ontology %s is missing import(s): %s",
+                        ontologyResource.stringValue(), StringUtils.join(missingOntologies, ", ")));
+            }
+        }
+        // Warn about missing ontologies.
         analyzeAndGenerate();
     }
 
@@ -88,7 +102,7 @@ public class Ontology {
 
     private void analyzeAndGenerate() throws OrmException {
         // Find all the imports of this particular model.
-        model.filter(resource, OWL.IMPORTS, null).objects().stream()
+        model.filter(ontologyResource, OWL.IMPORTS, null).objects().stream()
                 // Convert from Value to Resource and add to our set.
                 .map(this::toResource).forEach(imports::add);
         // Add all class resources to our index.
@@ -117,7 +131,7 @@ public class Ontology {
                                 .useResource(propResource)
                                 .useFunctional(GraphUtils.lookupFunctional(model, propResource))
                                 .useCodeModel(jPackage.owner())
-                                .useJavaName(NamingUtilities.getPropertyName(model, resource))
+                                .useJavaName(NamingUtilities.getPropertyName(model, ontologyResource))
                                 .useRangeIri(GraphUtils.lookupRange(model, propResource))
                                 .build()));
 //        model.filter(null, RDF.TYPE, OWL.OBJECTPROPERTY).subjects();

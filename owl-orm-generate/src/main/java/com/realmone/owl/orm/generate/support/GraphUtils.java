@@ -8,6 +8,7 @@ import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,5 +46,37 @@ public class GraphUtils {
                 })
                 //  collect into a set of resources.
                 .collect(Collectors.toSet());
+    }
+
+    public static Set<Resource> getImports(Model model, Resource ontology) {
+        try {
+            return model.filter(ontology, OWL.IMPORTS, null).objects().stream()
+                    // Map to resources
+                    .map(Resource.class::cast)
+                    // Collect as a set.
+                    .collect(Collectors.toSet());
+        } catch (ClassCastException e) {
+            throw new OrmGenerationException("Problem getting imports for ontology: " + ontology.stringValue());
+        }
+    }
+
+    public static Set<Resource> missingOntologies(Model model, Resource centralOntology) {
+        Set<Resource> missing = new HashSet<>();
+        checkForMissingOntologies(missing, model, getImports(model, centralOntology));
+        return missing;
+    }
+
+    private static void checkForMissingOntologies(Set<Resource> missing, Model model, Set<Resource> lookingFor) {
+        Set<Resource> alsoLookFor = new HashSet<>();
+        lookingFor.forEach(importResource -> {
+            if (model.filter(importResource, RDF.TYPE, OWL.ONTOLOGY).isEmpty()) {
+                missing.add(importResource);
+            } else {
+                alsoLookFor.addAll(getImports(model, importResource));
+            }
+        });
+        if (!alsoLookFor.isEmpty()) {
+            checkForMissingOntologies(missing, model, alsoLookFor);
+        }
     }
 }

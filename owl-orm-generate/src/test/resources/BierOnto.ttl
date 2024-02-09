@@ -65,7 +65,7 @@
 <https://mobi.com/ontologies/4/2018/BierOnto> a <http://www.w3.org/2002/07/owl#Ontology>;
   <http://purl.org/dc/terms/description> "The Official Mobier Ontology";
   <http://purl.org/dc/terms/title> "BierOnto";
-  <http://www.w3.org/2002/07/owl#imports> <http://xmlns.com/foaf/0.1/> .
+  <http://www.w3.org/2002/07/owl#imports> <http://xmlns.com/foaf/0.1> .
 
 <https://mobi.com/ontologies/4/2018/BierOnto#Beer> a <http://www.w3.org/2002/07/owl#Class>;
   <http://purl.org/dc/terms/title> "Beer" .

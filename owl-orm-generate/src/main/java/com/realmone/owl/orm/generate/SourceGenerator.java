@@ -11,7 +11,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ModelFactory;
 import org.eclipse.rdf4j.model.Resource;
@@ -33,7 +32,7 @@ public class SourceGenerator implements Runnable, ClosureIndex {
 
     private final Model metamodel = MODEL_FACTORY.createEmptyModel();
     private final Set<ReferenceOntology> references;
-    private final Set<Ontology> generateFor;
+    private final Set<GeneratingOntology> generateFor;
     private final String outputLocation;
     private final String prolog;
     private final FileSystemManager fileSystemManager;
@@ -43,7 +42,7 @@ public class SourceGenerator implements Runnable, ClosureIndex {
     @Builder
     protected SourceGenerator(@NonNull Set<OntologyMeta> generateForOntologies,
                               @NonNull Set<OntologyMeta> referenceOntologies,
-                              @NonNull String outputLocation) {
+                              @NonNull String outputLocation, Boolean enforceFullClosure) {
         this.outputLocation = outputLocation;
         try {
             fileSystemManager = VFS.getManager();
@@ -75,13 +74,14 @@ public class SourceGenerator implements Runnable, ClosureIndex {
         });
         // Initialize our target ontologies to generate.
         generateFor = new HashSet<>(generateForOntologies.size());
-        generateForOntologies.forEach(wrapper -> generateFor.add(Ontology.builder()
+        generateForOntologies.forEach(wrapper -> generateFor.add(GeneratingOntology.builder()
                 .useCodeModel(jCodeModel)
                 .useOntologyModel(loadOntologyModel(wrapper.getFile()))
                 .useReferenceModel(metamodel)
                 .useClosureIndex(this)
                 .useOntologyPackage(wrapper.getPackageName())
                 .useOntologyName(wrapper.getOntologyName())
+                .useEnforceFullClosure(enforceFullClosure)
                 .build()));
     }
 
@@ -92,7 +92,7 @@ public class SourceGenerator implements Runnable, ClosureIndex {
     }
 
     @Override
-    public Optional<JClass> findClassReference(Ontology generating, Resource resource) {
+    public Optional<JClass> findClassReference(GeneratingOntology generating, Resource resource) {
         JClass ref = generating.getClassIndex().get(resource);
         if (ref == null) {
             return references.stream().map(refOnt -> refOnt.getClassIndex().get(resource)).filter(Objects::nonNull)

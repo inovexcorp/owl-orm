@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
-import java.sql.Ref;
 
 public class TestReferenceOntology {
 
