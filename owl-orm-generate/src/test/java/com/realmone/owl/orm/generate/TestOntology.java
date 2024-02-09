@@ -60,7 +60,7 @@ public class TestOntology {
                 .build();
         int classCount = model.filter(null, RDF.TYPE, OWL.CLASS).size();
         Assert.assertEquals("Expected one generated class per ontology",
-                classCount, ontology.getClasses().size());
+                classCount, ontology.getClassIris().size());
         Assert.assertEquals("Expected bieronto ontology IRI did not match",
                 "https://mobi.com/ontologies/4/2018/BierOnto", ontology.getResource().stringValue());
         codeModel.build(output);

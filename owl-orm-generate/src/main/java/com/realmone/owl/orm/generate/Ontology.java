@@ -2,12 +2,16 @@ package com.realmone.owl.orm.generate;
 
 import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.annotations.Type;
+import com.realmone.owl.orm.generate.properties.DatatypeProperty;
+import com.realmone.owl.orm.generate.support.GraphUtils;
+import com.realmone.owl.orm.generate.support.NamingUtilities;
+import com.realmone.owl.orm.generate.properties.ObjectProperty;
 import com.sun.codemodel.*;
 import lombok.Builder;
 import lombok.Getter;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Value;
+import lombok.NonNull;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -19,38 +23,47 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Ontology {
 
+    private static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
+
     @Getter
     private final JPackage jPackage;
+    @Getter
     private final Map<Resource, JDefinedClass> classIndex = new HashMap<>();
     @Getter
     private final Resource resource;
     @Getter
     private final Set<Resource> imports = new HashSet<>();
     @Getter
-    private final Set<Resource> classes = new HashSet<>();
+    private final Set<Resource> classIris = new HashSet<>();
     @Getter
     private final Map<Resource, Set<Resource>> classHierarchy = new HashMap<>();
     @Getter
-    private final Set<Resource> datatypeProperties = new HashSet<>();
-    @Getter
-    private final Set<Resource> objectProperties = new HashSet<>();
+    private final Model closureModel;
     @Getter
     private final Model model;
+    @Getter
+    private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
+    @Getter
+    private final Set<ObjectProperty> objectProperties = new HashSet<>();
+
+    private final ClosureIndex closureIndex;
 
     @Builder(setterPrefix = "use")
-    public Ontology(JCodeModel codeModel, Model ontologyModel, String ontologyName,
-                    String ontologyPackage) throws OrmException {
+    public Ontology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
+                    @NonNull Model referenceModel, @NonNull String ontologyName,
+                    @NonNull String ontologyPackage, @NonNull ClosureIndex closureIndex) throws OrmException {
         this.jPackage = codeModel._package(ontologyPackage);
+        this.closureIndex = closureIndex;
         this.model = ontologyModel;
         this.resource = getOntologyResource(model, ontologyName);
+        this.closureModel = MODEL_FACTORY.createEmptyModel();
+        closureModel.addAll(ontologyModel);
+        closureModel.addAll(referenceModel);
         analyzeAndGenerate();
     }
 
@@ -80,17 +93,34 @@ public class Ontology {
                 .map(this::toResource).forEach(imports::add);
         // Add all class resources to our index.
         // TODO - RDFS.CLASS support?
-        classes.addAll(model.filter(null, RDF.TYPE, OWL.CLASS).subjects());
+        classIris.addAll(model.filter(null, RDF.TYPE, OWL.CLASS).subjects());
         // Build our hierarchy index map.
-        classes.forEach(clazz -> {
-            classIndex.put(clazz, generateInterface(clazz));
+        classIris.forEach(classResource -> {
+            classIndex.put(classResource, generateInterface(classResource));
             // Add our class to the hierarchy
-            classHierarchy.put(clazz, model.filter(clazz, RDFS.SUBCLASSOF, null)
-                    // Find the subClassOf properties, and collect into a set of resources.
-                    .objects().stream().map(Resource.class::cast).collect(Collectors.toSet()));
+            classHierarchy.put(classResource, GraphUtils.lookupParentClasses(closureModel, classResource));
         });
-        datatypeProperties.addAll(model.filter(null, RDF.TYPE, OWL.DATATYPEPROPERTY).subjects());
-        objectProperties.addAll(model.filter(null, RDF.TYPE, OWL.OBJECTPROPERTY).subjects());
+        classHierarchy.forEach((classResource, parents) -> {
+            JDefinedClass clazz = classIndex.get(classResource);
+            parents.forEach(parentResource -> {
+                JClass ref = closureIndex.findClassReference(this, parentResource)
+                        //TODO - better error message
+                        .orElseThrow(() -> new OrmGenerationException("Couldn't find parent class in index: " +
+                                parentResource));
+                clazz._implements(ref);
+            });
+        });
+        // Start our index of Datatype Properties
+        model.filter(null, RDF.TYPE, OWL.DATATYPEPROPERTY).subjects()
+                .forEach(propResource -> datatypeProperties.put(propResource,
+                        DatatypeProperty.builder()
+                                .useResource(propResource)
+                                .useFunctional(GraphUtils.lookupFunctional(model, propResource))
+                                .useCodeModel(jPackage.owner())
+                                .useJavaName(NamingUtilities.getPropertyName(model, resource))
+                                .useRangeIri(GraphUtils.lookupRange(model, propResource))
+                                .build()));
+//        model.filter(null, RDF.TYPE, OWL.OBJECTPROPERTY).subjects();
     }
 
     private JDefinedClass generateInterface(Resource resource)
@@ -122,7 +152,7 @@ public class Ontology {
             comment.add("*************************");
             // Annotate the class with the @Generated annotation and relevant metadata.
             interfaze.annotate(Generated.class)
-                    .param("value", getClass().getName())
+                    .param("value", SourceGenerator.class.getName())
                     .param("date", ZonedDateTime.now().toString())
                     .param("comments", String.format("Generated by OWL ORM Maven Plugin for ontology: %s",
                             resource.stringValue()));

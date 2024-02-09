@@ -1,4 +1,4 @@
-package com.realmone.owl.orm.generate;
+package com.realmone.owl.orm.generate.support;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
@@ -11,6 +11,10 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 public class NamingUtilities {
 
     public static String getClassName(Model closure, Resource resource) {
+        return safeName(getNameTemplate(closure, resource), true);
+    }
+
+    public static String getPropertyName(Model closure, Resource resource) {
         return safeName(getNameTemplate(closure, resource), true);
     }
 
