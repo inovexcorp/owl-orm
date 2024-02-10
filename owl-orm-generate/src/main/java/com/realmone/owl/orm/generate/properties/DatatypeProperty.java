@@ -1,7 +1,12 @@
 package com.realmone.owl.orm.generate.properties;
 
+import com.realmone.owl.orm.generate.ClosureIndex;
+import com.realmone.owl.orm.generate.OrmGenerationException;
+import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JMod;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,15 +19,24 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DatatypeProperty extends Property {
 
     @Builder(setterPrefix = "use")
-    protected DatatypeProperty(Resource rangeIri, JCodeModel codeModel, Resource resource,
-                               String javaName, boolean functional) {
-        super(codeModel, resource, javaName, functional, identifyRange(codeModel, rangeIri));
+    protected DatatypeProperty(Resource rangeIri, Set<Resource> domains, JCodeModel codeModel, ClosureIndex closureIndex,
+                               Resource resource, String javaName, boolean functional) {
+        super(codeModel, resource, javaName, functional, identifyRange(codeModel, rangeIri), closureIndex, domains,
+                GraphUtils.printModelForJavadoc(closureIndex.findContext(resource)));
+    }
+
+    @Override
+    public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
+
+
     }
 
     private static JClass identifyRange(JCodeModel codeModel, Resource rangeIri) {

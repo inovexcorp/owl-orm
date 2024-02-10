@@ -21,21 +21,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
+import javax.xml.transform.Source;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-public class GeneratingOntology {
+public class GeneratingOntology extends AbstractOntology implements ClosureIndex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneratingOntology.class);
-    private static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
 
     @Getter
     private final JPackage jPackage;
-    @Getter
-    private final Map<Resource, JDefinedClass> classIndex = new HashMap<>();
     @Getter
     private final Resource ontologyResource;
     @Getter
@@ -45,26 +43,21 @@ public class GeneratingOntology {
     @Getter
     private final Map<Resource, Set<Resource>> classHierarchy = new HashMap<>();
     @Getter
-    private final Model closureModel;
-    @Getter
     private final Model model;
     @Getter
     private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
     @Getter
-    private final Set<ObjectProperty> objectProperties = new HashSet<>();
-
-    private final ClosureIndex closureIndex;
+    private final Map<Resource, ObjectProperty> objectProperties = new HashMap<>();
 
     @Builder(setterPrefix = "use")
     public GeneratingOntology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
                               @NonNull Model referenceModel, @NonNull String ontologyName,
-                              @NonNull String ontologyPackage, @NonNull ClosureIndex closureIndex,
+                              @NonNull String ontologyPackage, @NonNull SourceGenerator sourceGenerator,
                               Boolean enforceFullClosure) throws OrmException {
         this.jPackage = codeModel._package(ontologyPackage);
-        this.closureIndex = closureIndex;
+        this.sourceGenerator = sourceGenerator;
         this.model = ontologyModel;
         this.ontologyResource = getOntologyResource(model, ontologyName);
-        this.closureModel = MODEL_FACTORY.createEmptyModel();
         closureModel.addAll(ontologyModel);
         closureModel.addAll(referenceModel);
         Set<Resource> missingOntologies = GraphUtils.missingOntologies(closureModel, ontologyResource);
@@ -90,9 +83,9 @@ public class GeneratingOntology {
             throw new OrmException(String.format("No ontology defined in file '%s'", ontologyName));
         } else {
             // For each ontology in the data -- should be exactly one.
-            ontologiesInModel.forEach(ontologyResource ->
+            ontologiesInModel.forEach(resource ->
                     // Put in our index the resource of that ontology
-                    model.filter(ontologyResource, OWL.IMPORTS, null).objects().stream()
+                    model.filter(resource, OWL.IMPORTS, null).objects().stream()
                             // Convert from Value to Resource and add to our set.
                             .map(this::toResource).forEach(imports::add)
             );
@@ -114,27 +107,55 @@ public class GeneratingOntology {
             // Add our class to the hierarchy
             classHierarchy.put(classResource, GraphUtils.lookupParentClasses(closureModel, classResource));
         });
+        // Define the class hierarchy
         classHierarchy.forEach((classResource, parents) -> {
-            JDefinedClass clazz = classIndex.get(classResource);
-            parents.forEach(parentResource -> {
-                JClass ref = closureIndex.findClassReference(this, parentResource)
-                        //TODO - better error message
-                        .orElseThrow(() -> new OrmGenerationException("Couldn't find parent class in index: " +
-                                parentResource));
-                clazz._implements(ref);
-            });
+            try {
+                JDefinedClass clazz = (JDefinedClass) classIndex.get(classResource);
+                parents.forEach(parentResource -> {
+                    JClass ref = findClassReference(parentResource)
+                            //TODO - better error message
+                            .orElseThrow(() -> new OrmGenerationException("Couldn't find parent class in index: " +
+                                    parentResource));
+                    clazz._implements(ref);
+                });
+            } catch (ClassCastException e) {
+                //TODO - better error handling...
+                throw new OrmGenerationException("", e);
+            }
         });
-        // Start our index of Datatype Properties
+        // Build out datatype properties.
         model.filter(null, RDF.TYPE, OWL.DATATYPEPROPERTY).subjects()
                 .forEach(propResource -> datatypeProperties.put(propResource,
                         DatatypeProperty.builder()
+                                .useClosureIndex(this)
                                 .useResource(propResource)
                                 .useFunctional(GraphUtils.lookupFunctional(model, propResource))
                                 .useCodeModel(jPackage.owner())
-                                .useJavaName(NamingUtilities.getPropertyName(model, ontologyResource))
+                                .useJavaName(NamingUtilities.getPropertyName(model, propResource))
                                 .useRangeIri(GraphUtils.lookupRange(model, propResource))
+                                .useDomains(GraphUtils.lookupDomain(model, propResource))
                                 .build()));
-//        model.filter(null, RDF.TYPE, OWL.OBJECTPROPERTY).subjects();
+        // Build out object properties.
+        model.filter(null, RDF.TYPE, OWL.OBJECTPROPERTY).subjects()
+                .forEach(propResource -> objectProperties.put(propResource,
+                        ObjectProperty.builder()
+                                .useClosureIndex(this)
+                                .useResource(propResource)
+                                .useCodeModel(jPackage.owner())
+                                .useRangeResource(GraphUtils.lookupRange(closureModel, propResource))
+                                .useDomains(GraphUtils.lookupDomain(model, propResource))
+                                .useFunctional(GraphUtils.lookupFunctional(closureModel, propResource))
+                                .useJavaName(NamingUtilities.getPropertyName(model, propResource))
+                                .build()));
+        // Attach properties to interfaces...
+        datatypeProperties.forEach((propResource, property) ->
+                property.getDomain().stream().map(classIndex::get)
+                        .map(JDefinedClass.class::cast)
+                        .forEach(property::attach));
+        objectProperties.forEach((propResource, property) ->
+                property.getDomain().stream().map(classIndex::get)
+                        .map(JDefinedClass.class::cast)
+                        .forEach(property::attach));
     }
 
     private JDefinedClass generateInterface(Resource resource)
@@ -157,20 +178,16 @@ public class GeneratingOntology {
     }
 
     private void markupInterface(JDefinedClass interfaze, Resource resource) throws IOException {
-        try (Writer writer = new StringWriter()) {
-            Rio.write(model.filter(resource, null, null), writer, RDFFormat.TURTLE);
-            JDocComment comment = interfaze.javadoc();
-            comment.add(String.format("Interface generated for class '%s'%n*************************",
-                    resource.stringValue()));
-            comment.add(writer.toString());
-            comment.add("*************************");
-            // Annotate the class with the @Generated annotation and relevant metadata.
-            interfaze.annotate(Generated.class)
-                    .param("value", SourceGenerator.class.getName())
-                    .param("date", ZonedDateTime.now().toString())
-                    .param("comments", String.format("Generated by OWL ORM Maven Plugin for ontology: %s",
-                            resource.stringValue()));
-        }
+        JDocComment comment = interfaze.javadoc();
+        comment.add(String.format("<p>Interface generated for class '%s'</p>%n", resource.stringValue()));
+        comment.add(GraphUtils.printModelForJavadoc(findContext(resource)));
+        // Annotate the class with the @Generated annotation and relevant metadata.
+        interfaze.annotate(Generated.class)
+                .param("value", SourceGenerator.class.getName())
+                .param("date", ZonedDateTime.now().toString())
+                .param("comments", String.format("Generated by OWL ORM Maven Plugin for ontology: %s",
+                        resource.stringValue()));
+
     }
 
     private Resource toResource(Value value) {

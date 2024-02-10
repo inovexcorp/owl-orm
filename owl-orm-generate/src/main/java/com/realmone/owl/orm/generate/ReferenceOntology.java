@@ -15,10 +15,9 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-public class ReferenceOntology {
+public class ReferenceOntology extends AbstractOntology implements ClosureIndex {
 
     @Getter
     private final Resource ontologyResource;
@@ -28,8 +27,6 @@ public class ReferenceOntology {
     private final String packageName;
     @Getter
     private final String ontologyName;
-    @Getter
-    private final Map<Resource, String> classIndex = new HashMap<>();
     @Getter
     private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
 
@@ -48,37 +45,18 @@ public class ReferenceOntology {
             this.packageName = packageName;
             this.ontologyName = ontologyName;
             this.model.filter(null, RDF.TYPE, OWL.CLASS).subjects().forEach(resource ->
-                    classIndex.put(resource, String.format("%s.%s", packageName,
-                            NamingUtilities.getClassName(ontologyModel, resource))));
+                    classIndex.put(resource, codeModel.ref(String.format("%s.%s", packageName,
+                            NamingUtilities.getClassName(ontologyModel, resource)))));
             this.model.filter(null, RDF.TYPE, OWL.DATATYPEPROPERTY).subjects()
                     .forEach(propResource -> datatypeProperties.put(propResource,
                             DatatypeProperty.builder()
                                     .useResource(propResource)
                                     .useFunctional(GraphUtils.lookupFunctional(ontologyModel, propResource))
                                     .useCodeModel(codeModel)
+                                    .useClosureIndex(this)
                                     .useJavaName(NamingUtilities.getPropertyName(ontologyModel, propResource))
                                     .useRangeIri(GraphUtils.lookupRange(ontologyModel, propResource))
                                     .build()));
         }
     }
-
-    public boolean containsClass(final Resource classIri) {
-        return classIndex.containsKey(classIri);
-    }
-
-    public Optional<String> getClassName(final Resource classIri) {
-        return Optional.ofNullable(classIndex.get(classIri));
-    }
-
-    public boolean containsProperty(final Resource propertyIri) {
-        return !(model.filter(propertyIri, RDF.TYPE, RDF.PROPERTY).isEmpty()
-                && model.filter(propertyIri, RDF.TYPE, OWL.DATATYPEPROPERTY).isEmpty()
-                && model.filter(propertyIri, RDF.TYPE, OWL.OBJECTPROPERTY).isEmpty());
-    }
-
-    public Optional<String> getPropertyName(final Resource propertyName) {
-        return Optional.ofNullable(
-                containsProperty(propertyName) ? NamingUtilities.getPropertyName(model, propertyName) : null);
-    }
-    // TODO initialize Property instances?
 }

@@ -5,6 +5,7 @@ import com.sun.codemodel.*;
 import com.sun.codemodel.writer.FileCodeWriter;
 import com.sun.codemodel.writer.PrologCodeWriter;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -26,17 +27,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public class SourceGenerator implements Runnable, ClosureIndex {
+public class SourceGenerator implements Runnable {
 
     private static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
 
     private final Model metamodel = MODEL_FACTORY.createEmptyModel();
+    @Getter
     private final Set<ReferenceOntology> references;
+    @Getter
     private final Set<GeneratingOntology> generateFor;
+    @Getter
+    private final JCodeModel jCodeModel = new JCodeModel();
     private final String outputLocation;
     private final String prolog;
     private final FileSystemManager fileSystemManager;
-    private final JCodeModel jCodeModel = new JCodeModel();
+
 
 
     @Builder
@@ -78,7 +83,7 @@ public class SourceGenerator implements Runnable, ClosureIndex {
                 .useCodeModel(jCodeModel)
                 .useOntologyModel(loadOntologyModel(wrapper.getFile()))
                 .useReferenceModel(metamodel)
-                .useClosureIndex(this)
+                .useSourceGenerator(this)
                 .useOntologyPackage(wrapper.getPackageName())
                 .useOntologyName(wrapper.getOntologyName())
                 .useEnforceFullClosure(enforceFullClosure)
@@ -87,20 +92,9 @@ public class SourceGenerator implements Runnable, ClosureIndex {
 
     @Override
     public void run() {
+
         // Generate the output sources
         writeSources();
-    }
-
-    @Override
-    public Optional<JClass> findClassReference(GeneratingOntology generating, Resource resource) {
-        JClass ref = generating.getClassIndex().get(resource);
-        if (ref == null) {
-            return references.stream().map(refOnt -> refOnt.getClassIndex().get(resource)).filter(Objects::nonNull)
-                    .map(jCodeModel::ref)
-                    .findFirst();
-        } else {
-            return Optional.of(ref);
-        }
     }
 
     private void writeSources() {

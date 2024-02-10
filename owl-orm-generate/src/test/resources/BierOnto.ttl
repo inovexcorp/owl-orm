@@ -288,6 +288,11 @@
   <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#Pour>;
   <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#User> .
 
+<https://mobi.com/ontologies/4/2018/BierOnto#knowsUser> a <http://www.w3.org/2002/07/owl#ObjectProperty>;
+  <http://purl.org/dc/terms/title> "knowsUser";
+  <http://www.w3.org/2000/01/rdf-schema#domain> <https://mobi.com/ontologies/4/2018/BierOnto#User>;
+  <http://www.w3.org/2000/01/rdf-schema#range> <https://mobi.com/ontologies/4/2018/BierOnto#User> .
+
 <https://mobi.com/ontologies/4/2018/BierOnto#pourVolume> a <http://www.w3.org/2002/07/owl#DatatypeProperty>,
     <http://www.w3.org/2002/07/owl#FunctionalProperty>;
   <http://purl.org/dc/terms/title> "pourVolume";

@@ -33,7 +33,5 @@ public class TestReferenceOntology {
                 .packageName("com.realmone.bieronto")
                 .build();
         Assert.assertEquals(19, ont.getClassIndex().size());
-        Assert.assertEquals("com.realmone.bieronto.Beer",
-                ont.getClassName(VF.createIRI("https://mobi.com/ontologies/4/2018/BierOnto#Beer")).orElseThrow());
     }
 }
