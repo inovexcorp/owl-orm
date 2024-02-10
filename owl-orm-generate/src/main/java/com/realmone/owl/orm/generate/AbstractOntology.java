@@ -31,13 +31,14 @@ public class AbstractOntology implements ClosureIndex {
     public AbstractOntology(SourceGenerator sourceGenerator, JCodeModel codeModel) {
         this.sourceGenerator = sourceGenerator;
         this.codeModel = codeModel;
-        this.classIndex.put(OWL.THING, codeModel.ref(Thing.class));
     }
 
     @Override
     public Optional<JClass> findClassReference(Resource resource) {
         JClass ref = classIndex.get(resource);
-        if (ref == null) {
+        if (ref == null && resource.equals(OWL.THING)) {
+            return Optional.of(codeModel.ref(Thing.class));
+        } else if (ref == null) {
             return sourceGenerator.getReferences().stream().map(refOnt -> refOnt.getClassIndex().get(resource))
                     .filter(Objects::nonNull).findFirst();
         } else {
