@@ -43,11 +43,13 @@ public class SourceGenerator implements Runnable {
     private final FileSystemManager fileSystemManager;
 
 
-
     @Builder
     protected SourceGenerator(@NonNull Set<OntologyMeta> generateForOntologies,
                               @NonNull Set<OntologyMeta> referenceOntologies,
-                              @NonNull String outputLocation, Boolean enforceFullClosure) {
+                              @NonNull String outputLocation, Boolean enforceFullClosure,
+                              Boolean isolateGenerationClosures) {
+        final boolean includeGeneratedOntologiesInReferences = isolateGenerationClosures == null
+                || !isolateGenerationClosures;
         this.outputLocation = outputLocation;
         try {
             fileSystemManager = VFS.getManager();
@@ -64,19 +66,12 @@ public class SourceGenerator implements Runnable {
             throw new OrmGenerationException("Issue loading prolog data for file headers", e);
         }
         // Initialize our reference closure.
-        this.references = new HashSet<>(referenceOntologies.size());
-        referenceOntologies.forEach(wrapper -> {
-            // Load our reference data into a model and create a ReferenceOntology instance.
-            final Model model = loadOntologyModel(wrapper.getFile());
-            this.references.add(ReferenceOntology.builder()
-                    .codeModel(jCodeModel)
-                    .ontologyModel(model)
-                    .packageName(wrapper.getPackageName())
-                    .ontologyName(wrapper.getOntologyName())
-                    .build());
-            // Dump all reference models into our meta model.
-            this.metamodel.addAll(model);
-        });
+        this.references = new HashSet<>(includeGeneratedOntologiesInReferences ?
+                referenceOntologies.size() + generateForOntologies.size() : referenceOntologies.size());
+        referenceOntologies.forEach(this::loadReference);
+        if (isolateGenerationClosures == null || !isolateGenerationClosures) {
+            generateForOntologies.forEach(this::loadReference);
+        }
         // Initialize our target ontologies to generate.
         generateFor = new HashSet<>(generateForOntologies.size());
         generateForOntologies.forEach(wrapper -> generateFor.add(GeneratingOntology.builder()
@@ -86,8 +81,22 @@ public class SourceGenerator implements Runnable {
                 .useSourceGenerator(this)
                 .useOntologyPackage(wrapper.getPackageName())
                 .useOntologyName(wrapper.getOntologyName())
-                .useEnforceFullClosure(enforceFullClosure)
+                .useEnforceFullClosure(enforceFullClosure == null || enforceFullClosure)
                 .build()));
+    }
+
+    private void loadReference(OntologyMeta wrapper) {
+        // Load our reference data into a model and create a ReferenceOntology instance.
+        final Model model = loadOntologyModel(wrapper.getFile());
+        this.references.add(ReferenceOntology.builder()
+                .codeModel(jCodeModel)
+                .ontologyModel(model)
+                .packageName(wrapper.getPackageName())
+                .ontologyName(wrapper.getOntologyName())
+                .sourceGenerator(this)
+                .build());
+        // Dump all reference models into our meta model.
+        this.metamodel.addAll(model);
     }
 
     @Override

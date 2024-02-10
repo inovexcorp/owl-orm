@@ -1,5 +1,6 @@
 package com.realmone.owl.orm.generate.properties;
 
+import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.generate.ClosureIndex;
 import com.realmone.owl.orm.generate.OrmGenerationException;
 import com.realmone.owl.orm.generate.support.GraphUtils;
@@ -23,8 +24,8 @@ public class ObjectProperty extends Property {
     @Builder(setterPrefix = "use")
     protected ObjectProperty(Resource rangeResource, Set<Resource> domains, ClosureIndex closureIndex,
                              JCodeModel codeModel, Resource resource, String javaName, boolean functional) {
-        super(codeModel, resource, javaName, functional, identifyRange(closureIndex, rangeResource), closureIndex,
-                domains, GraphUtils.printModelForJavadoc(closureIndex.findContext(resource)));
+        super(codeModel, resource, javaName, functional, identifyRange(closureIndex, rangeResource, codeModel),
+                closureIndex, domains, GraphUtils.printModelForJavadoc(closureIndex.findContext(resource)));
     }
 
     @Override
@@ -32,9 +33,9 @@ public class ObjectProperty extends Property {
 
     }
 
-    private static JClass identifyRange(ClosureIndex closureIndex, Resource rangeIri) throws OrmGenerationException {
+    private static JClass identifyRange(ClosureIndex closureIndex, Resource rangeIri, JCodeModel codeModel)
+            throws OrmGenerationException {
         return closureIndex.findClassReference(rangeIri)
-                .orElseThrow(() -> new OrmGenerationException("Couldn't find class to reference for range: " +
-                        rangeIri.stringValue()));
+                .orElseGet(() -> codeModel.ref(Thing.class));
     }
 }

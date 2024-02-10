@@ -53,16 +53,16 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
     public GeneratingOntology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
                               @NonNull Model referenceModel, @NonNull String ontologyName,
                               @NonNull String ontologyPackage, @NonNull SourceGenerator sourceGenerator,
-                              Boolean enforceFullClosure) throws OrmException {
+                              boolean enforceFullClosure) throws OrmException {
+        super(sourceGenerator, codeModel);
         this.jPackage = codeModel._package(ontologyPackage);
-        this.sourceGenerator = sourceGenerator;
         this.model = ontologyModel;
         this.ontologyResource = getOntologyResource(model, ontologyName);
         closureModel.addAll(ontologyModel);
         closureModel.addAll(referenceModel);
         Set<Resource> missingOntologies = GraphUtils.missingOntologies(closureModel, ontologyResource);
         if (!missingOntologies.isEmpty()) {
-            if (enforceFullClosure == null || enforceFullClosure) {
+            if (enforceFullClosure) {
                 throw new OrmGenerationException(String.format("Ontology %s is missing import(s): %s",
                         ontologyResource.stringValue(), StringUtils.join(missingOntologies, ", ")));
             } else if (LOGGER.isWarnEnabled()) {
@@ -150,10 +150,12 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
         // Attach properties to interfaces...
         datatypeProperties.forEach((propResource, property) ->
                 property.getDomain().stream().map(classIndex::get)
+                        .filter(JDefinedClass.class::isInstance)
                         .map(JDefinedClass.class::cast)
                         .forEach(property::attach));
         objectProperties.forEach((propResource, property) ->
                 property.getDomain().stream().map(classIndex::get)
+                        .filter(JDefinedClass.class::isInstance)
                         .map(JDefinedClass.class::cast)
                         .forEach(property::attach));
     }

@@ -81,6 +81,11 @@
             <artifactId>owl-orm-types</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.realmone</groupId>
+            <artifactId>owl-orm-generate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

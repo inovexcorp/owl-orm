@@ -1,16 +1,24 @@
 package com.realmone.owl.orm.generate;
 
 import com.realmone.owl.orm.generate.properties.DatatypeProperty;
+import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ModelFactory;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Optional;
+
 public class TestProperties {
 
     private static final ValueFactory VF = new ValidatingValueFactory();
+    private static final ModelFactory MF = new DynamicModelFactory();
 
     @Test
     public void testDatatypeProperty() {
@@ -19,6 +27,17 @@ public class TestProperties {
                 .useJavaName("com.realmone.Fake")
                 .useFunctional(true)
                 .useCodeModel(codeModel)
+                .useClosureIndex(new ClosureIndex() {
+                    @Override
+                    public Optional<JClass> findClassReference(Resource classIri) {
+                        return Optional.empty();
+                    }
+
+                    @Override
+                    public Model findContext(Resource resource) {
+                        return MF.createEmptyModel();
+                    }
+                })
                 .useRangeIri(XSD.STRING)
                 .useResource(VF.createIRI("urn://fake"))
                 .build();

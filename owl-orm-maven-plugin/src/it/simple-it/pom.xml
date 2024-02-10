@@ -33,31 +33,17 @@
                         <ontology>
                             <ontologyFile>${project.basedir}/BierOnto.ttl</ontologyFile>
                             <outputPackage>com.realmone.bieronto</outputPackage>
-                            <ontologyName>DC Elements</ontologyName>
+                            <ontologyName>BierOnto</ontologyName>
                         </ontology>
                         <ontology>
                             <ontologyFile>${project.basedir}/foaf.owl</ontologyFile>
                             <outputPackage>com.realmone.foaf</outputPackage>
-                            <ontologyName>DC Terms</ontologyName>
+                            <ontologyName>Friend of a Friend</ontologyName>
                         </ontology>
                     </generates>
-                    <references>
-                        <ontology>
-                            <ontologyFile>${project.basedir}/owl.ttl</ontologyFile>
-                            <outputPackage>com.realmone.owl</outputPackage>
-                            <ontologyName>OWL Ontology</ontologyName>
-                        </ontology>
-                        <ontology>
-                            <ontologyFile>${project.basedir}/dcelements_ontology.ttl</ontologyFile>
-                            <outputPackage>com.realmone.dcelements</outputPackage>
-                            <ontologyName>DC Elements</ontologyName>
-                        </ontology>
-                        <ontology>
-                            <ontologyFile>${project.basedir}/dcterms_ontology.ttl</ontologyFile>
-                            <outputPackage>com.realmone.dcterms</outputPackage>
-                            <ontologyName>DC Terms</ontologyName>
-                        </ontology>
-                    </references>
+                    <enforceFullClosure>true</enforceFullClosure>
+                    <isolateGenerationClosures>false</isolateGenerationClosures>
+                    <outputLocation>${project.basedir}/target/generated-sources</outputLocation>
                 </configuration>
             </plugin>
         </plugins>
