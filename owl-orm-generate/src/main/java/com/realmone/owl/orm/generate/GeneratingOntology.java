@@ -1,6 +1,7 @@
 package com.realmone.owl.orm.generate;
 
 import com.realmone.owl.orm.OrmException;
+import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.generate.properties.DatatypeProperty;
 import com.realmone.owl.orm.generate.support.GraphUtils;
@@ -166,6 +167,7 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
             // Create the interface in our package.
             JDefinedClass interfaze = jPackage._interface(JMod.PUBLIC,
                     NamingUtilities.getClassName(model, resource));
+            interfaze._extends(Thing.class);
             // Annotate the interface with our @Type interface to help wire proxy objects later.
             interfaze.annotate(Type.class).param("value", resource.stringValue());
             // Mark up the interface with appropriate comments and standard annotations.

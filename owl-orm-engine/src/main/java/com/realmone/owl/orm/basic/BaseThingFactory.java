@@ -5,10 +5,7 @@ import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 
 import java.lang.reflect.Proxy;
@@ -20,8 +17,14 @@ public class BaseThingFactory implements ThingFactory {
 
     private ValueConverterRegistry valueConverterRegistry;
 
-    public BaseThingFactory(ValueConverterRegistry valueConverterRegistry) {
+    private final ModelFactory modelFactory;
+    private final ValueFactory valueFactory;
+
+    public BaseThingFactory(ValueConverterRegistry valueConverterRegistry,
+                            ModelFactory modelFactory, ValueFactory valueFactory) {
         this.valueConverterRegistry = valueConverterRegistry;
+        this.modelFactory = modelFactory;
+        this.valueFactory = valueFactory;
     }
 
     @Override
@@ -69,6 +72,16 @@ public class BaseThingFactory implements ThingFactory {
             return Optional.of((T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
                     new Class[]{type}, handler));
         }
+    }
+
+    @Override
+    public ValueFactory getValueFactory() {
+        return valueFactory;
+    }
+
+    @Override
+    public ModelFactory getModelFactory() {
+        return modelFactory;
     }
 
     private <T extends Thing> Type getTypeAnnotation(Class<T> type) {

@@ -2,6 +2,7 @@ package com.realmone.owl.orm.generate.support;
 
 import com.google.common.xml.XmlEscapers;
 import com.realmone.owl.orm.generate.OrmGenerationException;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
@@ -83,7 +84,7 @@ public class GraphUtils {
 
     public static Set<Resource> missingOntologies(Model model, Resource centralOntology) {
         Set<Resource> missing = new HashSet<>();
-        checkForMissingOntologies(missing, model, getImports(model, centralOntology));
+        checkForMissingOntologies(missing, model, getImports(model, centralOntology), new HashSet<>());
         return missing;
     }
 
@@ -99,17 +100,20 @@ public class GraphUtils {
         }
     }
 
-    private static void checkForMissingOntologies(Set<Resource> missing, Model model, Set<Resource> lookingFor) {
+    private static void checkForMissingOntologies(Set<Resource> missing, Model model, Set<Resource> lookingFor, Set<Resource> seen) {
+        seen.addAll(lookingFor);
         Set<Resource> alsoLookFor = new HashSet<>();
         lookingFor.forEach(importResource -> {
             if (model.filter(importResource, RDF.TYPE, OWL.ONTOLOGY).isEmpty()) {
                 missing.add(importResource);
             } else {
-                alsoLookFor.addAll(getImports(model, importResource));
+                Set<Resource> imports = getImports(model, importResource);
+                imports.removeAll(seen);
+                alsoLookFor.addAll(imports);
             }
         });
         if (!alsoLookFor.isEmpty()) {
-            checkForMissingOntologies(missing, model, alsoLookFor);
+            checkForMissingOntologies(missing, model, alsoLookFor, seen);
         }
     }
 }

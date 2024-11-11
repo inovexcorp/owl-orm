@@ -1,7 +1,9 @@
 package com.realmone.owl.orm;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ModelFactory;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 
 import java.util.Optional;
 
@@ -35,4 +37,7 @@ public interface ThingFactory {
      */
     <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException;
 
+    ValueFactory getValueFactory();
+
+    ModelFactory getModelFactory();
 }

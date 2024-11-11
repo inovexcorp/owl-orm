@@ -9,6 +9,7 @@ import com.realmone.owl.orm.types.IRIValueConverter;
 import com.realmone.owl.orm.types.ResourceValueConverter;
 import com.realmone.owl.orm.types.StringValueConverter;
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -23,11 +24,14 @@ import java.util.stream.Collectors;
 
 public class TestFactoryAndProxy {
 
+    private static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
+
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
     private static final DefaultValueConverterRegistry VALUE_CONVERTER_REGISTRY = new DefaultValueConverterRegistry();
 
-    private static final ThingFactory THING_FACTORY = new BaseThingFactory(VALUE_CONVERTER_REGISTRY);
+    private static final ThingFactory THING_FACTORY = new BaseThingFactory(VALUE_CONVERTER_REGISTRY, MODEL_FACTORY,
+            VALUE_FACTORY);
 
     @BeforeClass
     public static void initRegistry() {
