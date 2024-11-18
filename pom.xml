@@ -76,6 +76,7 @@
                     <includes>
                         <include>**/*.java</include>
                     </includes>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
         </plugins>
