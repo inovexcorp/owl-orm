@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.realmone</groupId>
         <artifactId>owl-orm</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.2</version>
     </parent>
 
     <artifactId>owl-orm-engine</artifactId>
