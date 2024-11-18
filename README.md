@@ -1,5 +1,5 @@
 # OWL ORM
-
+![OWL ORM Logo](owl-orm.png)
 This project provides a facade by which to work with native Java POJOs that operate on top of a RDF4j model based
 upon an OWL ontology.
 
