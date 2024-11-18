@@ -1,5 +1,6 @@
 package com.realmone.owl.orm.generate.support;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -8,6 +9,7 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
+@UtilityClass
 public class NamingUtilities {
 
     public static String getClassName(Model closure, Resource resource) {

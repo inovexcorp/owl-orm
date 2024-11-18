@@ -21,32 +21,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Getter
 public class GeneratingOntology extends AbstractOntology implements ClosureIndex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneratingOntology.class);
 
-    @Getter
     private final JPackage jPackage;
-    @Getter
     private final Resource ontologyResource;
-    @Getter
     private final Set<Resource> imports = new HashSet<>();
-    @Getter
     private final Set<Resource> classIris = new HashSet<>();
-    @Getter
     private final Map<Resource, Set<Resource>> classHierarchy = new HashMap<>();
-    @Getter
     private final Model model;
-    @Getter
     private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
-    @Getter
     private final Map<Resource, ObjectProperty> objectProperties = new HashMap<>();
 
     @Builder(setterPrefix = "use")
@@ -175,12 +167,10 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
         } catch (JClassAlreadyExistsException e) {
             throw new OrmException(String.format("Cannot generate class as it already exists in package: %s",
                     resource.stringValue()));
-        } catch (IOException e) {
-            throw new OrmException("Issue writing RDF for comments", e);
         }
     }
 
-    private void markupInterface(JDefinedClass interfaze, Resource resource) throws IOException {
+    private void markupInterface(JDefinedClass interfaze, Resource resource) {
         JDocComment comment = interfaze.javadoc();
         comment.add(String.format("<p>Interface generated for class '%s'</p>%n", resource.stringValue()));
         comment.add(GraphUtils.printModelForJavadoc(findContext(resource)));

@@ -2,6 +2,7 @@ package com.realmone.owl.orm.generate.support;
 
 import com.google.common.xml.XmlEscapers;
 import com.realmone.owl.orm.generate.OrmGenerationException;
+import lombok.experimental.UtilityClass;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@UtilityClass
 public class GraphUtils {
 
     public static boolean lookupFunctional(Model model, Resource resource) {
