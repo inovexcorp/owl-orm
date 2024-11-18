@@ -15,7 +15,7 @@ This project implements the core API by proxying interfaces and wrapping specifi
 base core logic to interact with the RDF4j model.
 
 ### OWL ORM Types
-
+[README.md](README.md)
 This project contains the TypeConverter logic that allows us to move between Datatype property Values and native
 Java objects/primitives.
 
