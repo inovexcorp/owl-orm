@@ -49,6 +49,11 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
+    public <T extends Thing> T create(Class<T> type, String resource, Model model) throws OrmException {
+        return create(type, valueFactory.createIRI(resource), model);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
