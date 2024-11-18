@@ -49,7 +49,13 @@ public interface ThingFactory {
      */
     <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException;
 
+    /**
+     * @return The RDF4j {@link ValueFactory} backing this {@link ThingFactory}.
+     */
     ValueFactory getValueFactory();
 
+    /**
+     * @return The RDF4j {@link ModelFactory} backing this {@link ThingFactory}.
+     */
     ModelFactory getModelFactory();
 }

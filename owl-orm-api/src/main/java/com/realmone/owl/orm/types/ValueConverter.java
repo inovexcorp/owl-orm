@@ -1,6 +1,5 @@
 package com.realmone.owl.orm.types;
 
-import com.realmone.owl.orm.Thing;
 import lombok.NonNull;
 import org.eclipse.rdf4j.model.Value;
 

@@ -8,6 +8,7 @@ import com.realmone.owl.orm.types.ValueConversionException;
 import com.realmone.owl.orm.types.ValueConverter;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
 import lombok.Builder;
+import lombok.NonNull;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.slf4j.Logger;
@@ -16,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,12 +103,12 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
      * underlying {@link BaseThing} implementation.
      *
      * @param method The {@link Method} being called on our proxy class
-     * @param args   The arguments passed into the method
+     * @param methodArgs   The arguments passed into the method
      * @return The {@link Object} that should be returned by the method invocation.
      * @throws ValueConversionException If there is an issue converting values during execution of the proxied
      *                                  method
      */
-    private Object intercept(Method method, Object[] args) throws ValueConversionException {
+    private Object intercept(Method method, Object[] methodArgs) throws ValueConversionException {
         final Property propertyAnn = method.getDeclaredAnnotation(Property.class);
         final IRI predicate = iri(propertyAnn.value());
         final Class<?> type = propertyAnn.type();
@@ -117,33 +116,23 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             LOGGER.trace("ORM Property lookup intercepted: {}\n\t{}", method.getName(), propertyAnn);
         }
         // If we're intercepting a normal OWL ORM accessor method.
-        if (isNormalAccessor(method, args)) {
+        if (isNormalAccessor(method, methodArgs)) {
             return propertyAnn.functional() ? getFunctionalPropertyValue(predicate, type)
                     : getNonFunctionalPropertyValue(predicate, type);
         }
         // Else if we're intercepting a normal OWL ORM modifier method.
-        else if (isNormalModifier(method, args)) {
+        else if (isNormalModifier(method, methodArgs)) {
             if (propertyAnn.functional()) {
-                setFunctionalPropertyValue(predicate, type, args);
+                setFunctionalPropertyValue(predicate, type, methodArgs);
             } else {
-                setNonFunctionalPropertyValue(predicate, type, args);
+                setNonFunctionalPropertyValue(predicate, type, methodArgs);
             }
             // Normal modifiers are of void return types.
             return null;
         }
         // Else if we're working on a non-functional add/remove/clear method.
-        else if (isNonFunctionalAddRemove(method, args)) {
-            // Raise exception if we're operating on top of a functional property...
-            if (propertyAnn.functional()) {
-                throw new OrmException("Cannot overlay an add/remove method on a functional property\n\t"
-                        + method.getName() + " - " + this);
-            } else {
-                if (method.getName().startsWith(CLEAROUT_PREFIX)) {
-                    return this.delegate.clearProperty(predicate);
-                } else {
-                    return addRemove(method.getName().startsWith(ADDTO_PREFIX), type, args[0], predicate);
-                }
-            }
+        else if (isNonFunctionalAddRemove(method, methodArgs)) {
+            return interceptNonFunctionalModifier(type, propertyAnn, predicate, method, methodArgs);
         }
         // Else it is unclear what type of method we're intercepting... raise an exception!
         else {
@@ -152,21 +141,40 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         }
     }
 
-    private <T> boolean addRemove(boolean add, Class<T> type, Object parameter, IRI predicate) throws OrmException {
+    private boolean interceptNonFunctionalModifier(Class<?> type, @NonNull Property propertyAnn, IRI predicate, Method method, Object[] args) throws ValueConversionException {
+        // Raise exception if we're operating on top of a functional property...
+        if (propertyAnn.functional()) {
+            throw new OrmException("Cannot overlay an add/remove method on a functional property\n\t"
+                    + method.getName() + " - " + this);
+        }
+        // Else we're truly operating on a non-functional property.
+        else {
+            if (method.getName().startsWith(CLEAROUT_PREFIX)) {
+                return this.delegate.clearProperty(predicate);
+            } else {
+                if (method.getName().startsWith(ADDTO_PREFIX)) {
+                    return add(type, args[0], predicate);
+                } else {
+                    return remove(type, args[0], predicate);
+                }
+            }
+        }
+    }
+
+    private <T> boolean add(Class<T> type, Object parameter, IRI predicate) throws OrmException {
         if (parameter != null) {
             // Object property
             if (Thing.class.isAssignableFrom(type)) {
                 final Thing paramThing = ((Thing) parameter);
-                final boolean modified = add ? delegate.addProperty(paramThing.getResource(), predicate)
-                        : delegate.removeProperty(paramThing.getResource(), predicate);
-                if (modified && add) {
-                    model.addAll(paramThing.getModel());
-                }
+                final boolean modified = delegate.addProperty(paramThing.getResource(), predicate);
+                model.addAll(paramThing.getModel());
                 return modified;
-            } else {
+            }
+            // Datatype Property
+            else {
                 try {
                     Value value = getRequiredValueConverter(type).convertType(type.cast(parameter));
-                    return add ? delegate.addProperty(value, predicate) : delegate.removeProperty(value, predicate);
+                    return delegate.addProperty(value, predicate);
                 } catch (ClassCastException e) {
                     throw new OrmException(String.format("Issue adding/removing property '%s' from object " +
                             "of type: %s", predicate, this), e);
@@ -174,6 +182,28 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             }
         } else {
             throw new OrmException("Null value cannot be added or removed from a non-functional property");
+        }
+    }
+
+    private <T> boolean remove(Class<T> type, Object parameter, IRI predicate) throws OrmException {
+        if (parameter != null) {
+            // Object property
+            if (Thing.class.isAssignableFrom(type)) {
+                final Thing paramThing = ((Thing) parameter);
+                return delegate.removeProperty(paramThing.getResource(), predicate);
+            }
+            // Datatype Property
+            else {
+                try {
+                    Value value = getRequiredValueConverter(type).convertType(type.cast(parameter));
+                    return delegate.removeProperty(value, predicate);
+                } catch (ClassCastException e) {
+                    throw new OrmException(String.format("Issue removing property '%s' from object " +
+                            "of type: %s", predicate, this), e);
+                }
+            }
+        } else {
+            throw new OrmException("Null value cannot be removed from a non-functional property");
         }
     }
 

@@ -6,7 +6,6 @@ import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JMod;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,7 +18,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.Set;
 
 @Data

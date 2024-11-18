@@ -4,30 +4,29 @@ import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.generate.properties.DatatypeProperty;
+import com.realmone.owl.orm.generate.properties.ObjectProperty;
 import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.realmone.owl.orm.generate.support.NamingUtilities;
-import com.realmone.owl.orm.generate.properties.ObjectProperty;
 import com.sun.codemodel.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
-import javax.xml.transform.Source;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class GeneratingOntology extends AbstractOntology implements ClosureIndex {
 

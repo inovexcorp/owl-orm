@@ -2,7 +2,6 @@ package com.realmone.owl.orm.generate.support;
 
 import com.google.common.xml.XmlEscapers;
 import com.realmone.owl.orm.generate.OrmGenerationException;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
