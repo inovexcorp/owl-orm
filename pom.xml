@@ -6,7 +6,7 @@
 
     <groupId>com.realmone</groupId>
     <artifactId>owl-orm</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>owl-orm-api</module>
@@ -55,6 +55,20 @@
         </dependency>
     </dependencies>
 
+    <scm>
+        <connection>scm:git:git@gitlab.inovexcorp.com:matonto/owl-orm.git</connection>
+        <developerConnection>scm:git:git@gitlab.inovexcorp.com:matonto/owl-orm.git</developerConnection>
+        <url>https://gitlab.inovexcorp.com/matonto/owl-orm</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>inovex</id>
+            <url>https://nexus.inovexcorp.com/nexus/content/repositories/public-maven-prod-hosted/</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -77,6 +91,17 @@
                         <include>**/*.java</include>
                     </includes>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+                    <releaseProfiles>release</releaseProfiles>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useGitHubToken>false</useGitHubToken>
                 </configuration>
             </plugin>
         </plugins>
