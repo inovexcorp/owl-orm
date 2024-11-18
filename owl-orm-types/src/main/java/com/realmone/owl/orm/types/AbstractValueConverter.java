@@ -23,7 +23,6 @@ package com.realmone.owl.orm.types;
  * #L%
  */
 
-import com.realmone.owl.orm.types.ValueConverter;
 import lombok.Getter;
 import lombok.NonNull;
 import org.eclipse.rdf4j.model.ValueFactory;

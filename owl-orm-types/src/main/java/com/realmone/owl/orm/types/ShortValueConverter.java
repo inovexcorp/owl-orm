@@ -1,7 +1,5 @@
 package com.realmone.owl.orm.types;
 
-import com.realmone.owl.orm.Thing;
-import com.realmone.owl.orm.types.ValueConversionException;
 import lombok.NonNull;
 import org.eclipse.rdf4j.model.Value;
 
