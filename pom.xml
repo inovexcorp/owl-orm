@@ -4,7 +4,7 @@
 
     <groupId>com.realmone</groupId>
     <artifactId>owl-orm</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>owl-orm-api</module>
@@ -57,7 +57,7 @@
         <connection>scm:git:git@gitlab.inovexcorp.com:matonto/owl-orm.git</connection>
         <developerConnection>scm:git:git@gitlab.inovexcorp.com:matonto/owl-orm.git</developerConnection>
         <url>https://gitlab.inovexcorp.com/matonto/owl-orm</url>
-        <tag>v0.0.3</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
