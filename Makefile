@@ -3,7 +3,7 @@
 MVN_ARGS := "-T 1.5C"
 
 build:
-	mvn clean install ${MVN_ARGS}
+	mvn clean install ${MVN_ARGS} -Prun-its
 
 add_license_headers:
 	mvn license:format ${MVN_ARGS}

@@ -32,17 +32,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AbstractOntology implements ClosureIndex {
+@Getter
+public abstract class AbstractOntology implements ClosureIndex {
 
     protected static final ModelFactory MODEL_FACTORY = new DynamicModelFactory();
 
-    @Getter
     protected final Map<Resource, JClass> classIndex = new HashMap<>();
-    @Getter
     protected final Model closureModel = MODEL_FACTORY.createEmptyModel();
-    @Getter
     protected final SourceGenerator sourceGenerator;
-    @Getter
     protected final JCodeModel codeModel;
 
     public AbstractOntology(SourceGenerator sourceGenerator, JCodeModel codeModel) {

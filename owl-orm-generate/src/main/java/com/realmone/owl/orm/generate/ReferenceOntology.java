@@ -34,17 +34,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ReferenceOntology extends AbstractOntology implements ClosureIndex {
+@Getter
+public class ReferenceOntology extends AbstractOntology {
 
-    @Getter
     private final Resource ontologyResource;
-    @Getter
     private final Model model;
-    @Getter
     private final String packageName;
-    @Getter
     private final String ontologyName;
-    @Getter
     private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
 
 
