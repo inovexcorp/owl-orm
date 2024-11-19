@@ -162,21 +162,30 @@ public class GeneratingOntology extends AbstractOntology {
                                 .build()));
         // Attach properties to interfaces...
         datatypeProperties.forEach((propResource, property) ->
-                property.getDomain().stream().map(classIndex::get)
-                        .filter(JDefinedClass.class::isInstance)
-                        .map(JDefinedClass.class::cast)
-                        .forEach(property::attach));
-        objectProperties.forEach((propResource, property) ->
-                property.getDomain().stream().map(classIndex::get)
-                        .filter(JDefinedClass.class::isInstance)
-                        .map(JDefinedClass.class::cast)
-                        .forEach(property::attach));
+        {
+            property.getDomain().stream().map(classIndex::get)
+                    .filter(JDefinedClass.class::isInstance)
+                    .map(JDefinedClass.class::cast)
+                    .forEach(property::attach);
+            if (property.getDomain().isEmpty()) {
+                property.attach(ontologyThing);
+            }
+        });
+        objectProperties.forEach((propResource, property) -> {
+            property.getDomain().stream().map(classIndex::get)
+                    .filter(JDefinedClass.class::isInstance)
+                    .map(JDefinedClass.class::cast)
+                    .forEach(property::attach);
+            if (property.getDomain().isEmpty()) {
+                property.attach(ontologyThing);
+            }
+        });
     }
 
     private JDefinedClass generateOntologyThing() throws OrmException {
         try {
             JDefinedClass ontThing = jPackage._interface(JMod.PUBLIC,
-                    NamingUtilities.safeName(ontologyName+ " Thing", true));
+                    NamingUtilities.safeName(ontologyName + " Thing", true));
             ontThing._extends(Thing.class);
             // Annotate?
             // Javadoc?
