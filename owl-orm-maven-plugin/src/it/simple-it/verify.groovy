@@ -4,4 +4,4 @@
 
 File bieronto = new File(basedir, "target/generated-sources/com/realmone/bieronto")
 assert bieronto.isDirectory()
-assert bieronto.listFiles().length == 19
+assert bieronto.listFiles().length == 20

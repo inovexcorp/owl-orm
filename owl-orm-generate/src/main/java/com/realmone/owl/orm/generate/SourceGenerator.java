@@ -73,15 +73,8 @@ public class SourceGenerator implements Runnable {
         } catch (FileSystemException e) {
             throw new OrmGenerationException("Issue initializing VFS system to fetch ontologies!", e);
         }
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("prolog.txt")) {
-            if (is != null) {
-                this.prolog = IOUtils.toString(is, Charset.defaultCharset());
-            } else {
-                throw new OrmGenerationException("Prolog file could not be found");
-            }
-        } catch (IOException e) {
-            throw new OrmGenerationException("Issue loading prolog data for file headers", e);
-        }
+        // Load prolog header.
+        this.prolog = loadProlog();
         // Initialize our reference closure.
         this.references = new HashSet<>(includeGeneratedOntologiesInReferences ?
                 referenceOntologies.size() + generateForOntologies.size() : referenceOntologies.size());
@@ -100,6 +93,18 @@ public class SourceGenerator implements Runnable {
                 .useOntologyName(wrapper.getOntologyName())
                 .useEnforceFullClosure(enforceFullClosure == null || enforceFullClosure)
                 .build()));
+    }
+
+    private String loadProlog(){
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("prolog.txt")) {
+            if (is != null) {
+                return IOUtils.toString(is, Charset.defaultCharset());
+            } else {
+                throw new OrmGenerationException("Prolog file could not be found");
+            }
+        } catch (IOException e) {
+            throw new OrmGenerationException("Issue loading prolog data for file headers", e);
+        }
     }
 
     private void loadReference(OntologyMeta wrapper) {
