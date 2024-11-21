@@ -77,7 +77,8 @@ public class GraphUtils {
                     .filter(parentResource -> {
                         if (model.filter(parentResource, null, null).isEmpty()) {
                             //TODO improve error message to include ontology, child class, and missing parent.
-                            throw new OrmGenerationException("No ontology data about parent resource in model");
+                            throw new OrmGenerationException("No ontology data about parent resource in model for " +
+                                    classResource.stringValue() + ": " + parentResource.stringValue());
                         }
                         return !model.filter(parentResource, RDF.TYPE, OWL.CLASS).isEmpty();
                     })
