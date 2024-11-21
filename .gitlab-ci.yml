@@ -36,7 +36,7 @@ run_maven_build:
     expire_in: 4 hrs
     paths:
       - "*/target/*.jar"
-  retry: 1
+
 
 ################################################################################
 ## Trigger Maven release for commits to main branch
