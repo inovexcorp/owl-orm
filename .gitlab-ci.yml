@@ -30,6 +30,10 @@ run_maven_build:
   only:
     - main
     - merge_requests
+  # Ignoring any coming from the release plugin...
+  except:
+    variables:
+      - $CI_COMMIT_TITLE =~ /^\[maven-release-plugin\].*$/
   script:
     - mvn ${MAVEN_CLI_OPTS} -T 4 clean install -Prun-its
   artifacts:
