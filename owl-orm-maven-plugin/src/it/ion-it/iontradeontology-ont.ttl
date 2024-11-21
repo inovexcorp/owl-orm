@@ -1,0 +1,82 @@
+
+	_:u0ddb8233-cbb5-4a90-b5a4-39bca8763501 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#Market_Event> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:ube2e3de5-929c-4438-8c63-968d3f6ff3b5 .
+	
+	_:u108c3c64-7cb5-46ae-a43b-5a625f818ee3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#Personal_Trade_Event> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:u6cee48e5-e0c4-4270-b6d5-d4b6512e1cc9 .
+	
+	_:u1b9db96e-b511-4dc8-bd57-c3d318972e35 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#Personal_Trade_Event> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:u55dbea45-afa7-4d2a-a744-459d554e0ac0 .
+	
+	_:u2e43b2fe-f4c8-4f2b-8888-9b8379dd1c39 a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2002/07/owl#unionOf> _:ufa14d755-c53f-44a5-8b88-0401c22928fa .
+	
+	_:u55dbea45-afa7-4d2a-a744-459d554e0ac0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#PM_Position_Data> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+	
+	_:u6cee48e5-e0c4-4270-b6d5-d4b6512e1cc9 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#PM_Position_Data> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+	
+	_:u71ed27b7-e6ac-4234-828c-fa7b10f371e8 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#Market_Data> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:u0ddb8233-cbb5-4a90-b5a4-39bca8763501 .
+	
+	_:ube2e3de5-929c-4438-8c63-968d3f6ff3b5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#Aggregate_Fills> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:u1b9db96e-b511-4dc8-bd57-c3d318972e35 .
+	
+	_:uca350f51-7df0-4a04-b879-fff4700eb5b7 a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2002/07/owl#unionOf> _:u71ed27b7-e6ac-4234-828c-fa7b10f371e8 .
+	
+	_:ufa14d755-c53f-44a5-8b88-0401c22928fa <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/trade#Aggregate_Fills> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:u108c3c64-7cb5-46ae-a43b-5a625f818ee3 .
+	
+	<http://ion.com/trade> <http://purl.org/dc/elements/1.1/title> "ION Trade Ontology" ;
+		<http://purl.org/dc/terms/created> "2022-07-08T12:27:02.562Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/creator> <http://openanzo.org/system/internal/sysadmin> ;
+		<http://purl.org/dc/terms/modified> "2022-08-09T11:32:11.109Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/modifier> <http://openanzo.org/system/internal/sysadmin> ;
+		a <http://www.w3.org/2002/07/owl#Ontology> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "ION Trade Ontology" ;
+		<http://www.w3.org/2002/07/owl#imports> <http://ion.com/query> , <http://ion.com/ref> .
+	
+	<http://ion.com/trade#Aggregate_Fills> <http://purl.org/dc/elements/1.1/title> "Aggregate Fills" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Aggregate Fills" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/query#Query_Event> .
+	
+	<http://ion.com/trade#Instrument> <http://purl.org/dc/elements/1.1/title> "Instrument" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Instrument" .
+	
+	<http://ion.com/trade#Market_Data> <http://purl.org/dc/elements/1.1/title> "Market Data" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Market Data" .
+	
+	<http://ion.com/trade#Market_Event> <http://purl.org/dc/elements/1.1/title> "Market Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Market Event" .
+	
+	<http://ion.com/trade#PM_Position_Data> <http://purl.org/dc/elements/1.1/title> "PM Position Data" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "PM Position Data" .
+	
+	<http://ion.com/trade#Personal_Trade_Event> <http://purl.org/dc/elements/1.1/title> "Personal Trade Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Personal Trade Event" .
+	
+	<http://ion.com/trade#Trader_ID> <http://purl.org/dc/elements/1.1/title> "Trader ID" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Trader ID" .
+	
+	<http://ion.com/trade#p_has_instrument> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/trade#Instrument> ;
+		<http://purl.org/dc/elements/1.1/title> "has instrument" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> _:uca350f51-7df0-4a04-b879-fff4700eb5b7 ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has instrument" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/trade#Instrument> .
+	
+	<http://ion.com/trade#p_has_trader_id> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/trade#Trader_ID> ;
+		<http://purl.org/dc/elements/1.1/title> "has trader id" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> _:u2e43b2fe-f4c8-4f2b-8888-9b8379dd1c39 ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has trader id" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/trade#Trader_ID> .

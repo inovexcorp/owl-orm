@@ -1,0 +1,345 @@
+
+	_:u1ba59857-3c81-4712-8e25-712dbc22ae00 a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2002/07/owl#unionOf> _:u26db8ce1-4667-4438-88a5-80460502017f .
+	
+	_:u26db8ce1-4667-4438-88a5-80460502017f <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:ue1cc6ad8-57a0-4250-aeda-3cc22269ad10 .
+	
+	_:u3f9f358c-25e4-45bc-bb32-5d10d1f0934d a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2002/07/owl#unionOf> _:u7155c610-e337-49ef-a81c-eac453ee8580 .
+	
+	_:u46943832-a4a9-4a7d-9e0e-dbf317ffff78 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/ref#Department_Code> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+	
+	_:u7155c610-e337-49ef-a81c-eac453ee8580 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/ref#Department> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:u46943832-a4a9-4a7d-9e0e-dbf317ffff78 .
+	
+	_:ue1cc6ad8-57a0-4250-aeda-3cc22269ad10 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://ion.com/ref#Department_Code> ;
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+	
+	<http://ion.com/ref> <http://purl.org/dc/elements/1.1/title> "ION Reference Ontology" ;
+		<http://purl.org/dc/terms/created> "2022-07-08T09:46:44.062Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/creator> <http://openanzo.org/system/internal/sysadmin> ;
+		<http://purl.org/dc/terms/modified> "2022-08-10T15:05:29.494Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/modifier> <http://openanzo.org/system/internal/sysadmin> ;
+		a <http://www.w3.org/2002/07/owl#Ontology> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "ION Reference Ontology" ;
+		<http://www.w3.org/2002/07/owl#imports> <http://ion.com/ecommPackage> , <http://ion.com/trade> .
+	
+	<http://ion.com/ref#Building> <http://purl.org/dc/elements/1.1/title> "Building" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Building" .
+	
+	<http://ion.com/ref#Building_Attribute> <http://purl.org/dc/elements/1.1/title> "Building Attribute" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Building Attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/ref#Temporal_Attribute> .
+	
+	<http://ion.com/ref#Country> <http://purl.org/dc/elements/1.1/title> "Country" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Country" .
+	
+	<http://ion.com/ref#Department> <http://purl.org/dc/elements/1.1/title> "Department" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Department" .
+	
+	<http://ion.com/ref#Department_Attribute> <http://purl.org/dc/elements/1.1/title> "Department Attribute" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Department Attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/ref#Temporal_Attribute> .
+	
+	<http://ion.com/ref#Department_Code> <http://purl.org/dc/elements/1.1/title> "Department Code" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Department Code" .
+	
+	<http://ion.com/ref#General_Temporal_Attribute> <http://purl.org/dc/elements/1.1/title> "General Temporal Attribute" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "General Temporal Attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/ref#Temporal_Attribute> .
+	
+	<http://ion.com/ref#Individual> <http://purl.org/dc/elements/1.1/title> "Individual" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Individual" .
+	
+	<http://ion.com/ref#Organization> <http://purl.org/dc/elements/1.1/title> "Organization" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Organization" .
+	
+	<http://ion.com/ref#Organization_Attribute> <http://purl.org/dc/elements/1.1/title> "Organization Attribute" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Organization Attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/ref#Temporal_Attribute> .
+	
+	<http://ion.com/ref#Phone_Number> <http://purl.org/dc/elements/1.1/title> "Phone Number" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Phone Number" .
+	
+	<http://ion.com/ref#Phone_Number_Attribute> <http://purl.org/dc/elements/1.1/title> "Phone Number Attribute" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Phone Number Attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/ref#Temporal_Attribute> .
+	
+	<http://ion.com/ref#Region> <http://purl.org/dc/elements/1.1/title> "Region" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Region" .
+	
+	<http://ion.com/ref#Relationship> <http://purl.org/dc/elements/1.1/title> "Relationship" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Relationship" .
+	
+	<http://ion.com/ref#Sector> <http://purl.org/dc/elements/1.1/title> "Sector" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Sector" .
+	
+	<http://ion.com/ref#Temporal_Attribute> <http://purl.org/dc/elements/1.1/title> "Temporal Attribute" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Temporal Attribute" .
+	
+	<http://ion.com/ref#Watchlist> <http://purl.org/dc/elements/1.1/title> "Watchlist" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Watchlist" .
+	
+	<http://ion.com/ref#p_has_attribute_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has attribute name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Temporal_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has attribute name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_attribute_value> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has attribute value" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Temporal_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has attribute value" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_building> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Building> ;
+		<http://purl.org/dc/elements/1.1/title> "has building" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Building_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has building" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Building> .
+	
+	<http://ion.com/ref#p_has_building_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Building_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has building attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has building attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Building_Attribute> .
+	
+	<http://ion.com/ref#p_has_building_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has building name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Building> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has building name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_country_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has country name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Country> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has country name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_department> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Department> ;
+		<http://purl.org/dc/elements/1.1/title> "has department" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Department_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has department" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Department> .
+	
+	<http://ion.com/ref#p_has_department_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Department_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has department attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has department attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Department_Attribute> .
+	
+	<http://ion.com/ref#p_has_department_code> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Department_Code> ;
+		<http://purl.org/dc/elements/1.1/title> "has department code" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Department> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has department code" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Department_Code> .
+	
+	<http://ion.com/ref#p_has_department_code_value> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has department code value" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Department_Code> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has department code value" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_email_address> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ecommPackage#Email_Address> ;
+		<http://purl.org/dc/elements/1.1/title> "has email address" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has email address" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ecommPackage#Email_Address> .
+	
+	<http://ion.com/ref#p_has_employee_id> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has employee id" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has employee id" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_employment_status_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#General_Temporal_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has employment status attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has employment status attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#General_Temporal_Attribute> .
+	
+	<http://ion.com/ref#p_has_end_datetime> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/elements/1.1/title> "has end datetime" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Temporal_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has end datetime" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+	
+	<http://ion.com/ref#p_has_first_name_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#General_Temporal_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has first name attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has first name attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#General_Temporal_Attribute> .
+	
+	<http://ion.com/ref#p_has_last_name_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#General_Temporal_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has last name attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has last name attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#General_Temporal_Attribute> .
+	
+	<http://ion.com/ref#p_has_member> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Individual> ;
+		<http://purl.org/dc/elements/1.1/title> "has member" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Relationship> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has member" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Individual> .
+	
+	<http://ion.com/ref#p_has_organization> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Organization> ;
+		<http://purl.org/dc/elements/1.1/title> "has organization" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Organization_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has organization" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Organization> .
+	
+	<http://ion.com/ref#p_has_organization_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Organization_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has organization attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has organization attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Organization_Attribute> .
+	
+	<http://ion.com/ref#p_has_organization_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has organization name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Organization> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has organization name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_phone_number> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Phone_Number> ;
+		<http://purl.org/dc/elements/1.1/title> "has phone number" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Phone_Number_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has phone number" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Phone_Number> .
+	
+	<http://ion.com/ref#p_has_phone_number_attribute> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Phone_Number_Attribute> ;
+		<http://purl.org/dc/elements/1.1/title> "has phone number attribute" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has phone number attribute" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Phone_Number_Attribute> .
+	
+	<http://ion.com/ref#p_has_region_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has region name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Region> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has region name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_sector> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Sector> ;
+		<http://purl.org/dc/elements/1.1/title> "has sector" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Department_Code> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has sector" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Sector> .
+	
+	<http://ion.com/ref#p_has_sector_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has sector name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Sector> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has sector name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_source> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has source" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Temporal_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has source" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_start_date_time> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/elements/1.1/title> "has start date time" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Temporal_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has start date time" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+	
+	<http://ion.com/ref#p_has_string_value> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has string value" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#General_Temporal_Attribute> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has string value" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_has_trader_id> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/trade#Trader_ID> ;
+		<http://purl.org/dc/elements/1.1/title> "has trader id" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> _:u3f9f358c-25e4-45bc-bb32-5d10d1f0934d ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has trader id" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/trade#Trader_ID> .
+	
+	<http://ion.com/ref#p_has_watchlist_name> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has watchlist name" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Watchlist> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has watchlist name" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/ref#p_is_front_office> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#boolean> ;
+		<http://purl.org/dc/elements/1.1/title> "is front office" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Department_Code> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "is front office" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+	
+	<http://ion.com/ref#p_is_in_country> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Country> ;
+		<http://purl.org/dc/elements/1.1/title> "is in country" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Building> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "is in country" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Country> .
+	
+	<http://ion.com/ref#p_is_in_region> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Region> ;
+		<http://purl.org/dc/elements/1.1/title> "is in region" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Country> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "is in region" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Region> .
+	
+	<http://ion.com/ref#p_is_on_watchlist> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Watchlist> ;
+		<http://purl.org/dc/elements/1.1/title> "is on watchlist" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/ref#Individual> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "is on watchlist" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Watchlist> .
+	
+	<http://ion.com/ref#p_is_restricted> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#boolean> ;
+		<http://purl.org/dc/elements/1.1/title> "is restricted" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> _:u1ba59857-3c81-4712-8e25-712dbc22ae00 ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "is restricted" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .

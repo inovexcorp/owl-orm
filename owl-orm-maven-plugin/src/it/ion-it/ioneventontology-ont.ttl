@@ -1,0 +1,100 @@
+	<http://ion.com/event> <http://purl.org/dc/elements/1.1/title> "ION Event Ontology" ;
+		<http://purl.org/dc/terms/created> "2022-07-08T11:11:44.355Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/creator> <http://openanzo.org/system/internal/sysadmin> ;
+		<http://purl.org/dc/terms/modified> "2022-08-09T12:58:39.633Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/modifier> <http://openanzo.org/system/internal/sysadmin> ;
+		a <http://www.w3.org/2002/07/owl#Ontology> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "ION Event Ontology" ;
+		<http://www.w3.org/2002/07/owl#imports> <http://ion.com/query> , <http://ion.com/ref> .
+	
+	<http://ion.com/event#Badge_Swipe_Event> <http://purl.org/dc/elements/1.1/title> "Badge Swipe Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Badge Swipe Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/event#Event> .
+	
+	<http://ion.com/event#Date_URI> <http://purl.org/dc/elements/1.1/title> "Date URI" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Date URI" .
+	
+	<http://ion.com/event#Device> <http://purl.org/dc/elements/1.1/title> "Device" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Device" .
+	
+	<http://ion.com/event#Event> <http://purl.org/dc/elements/1.1/title> "Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/query#Query_Event> .
+	
+	<http://ion.com/event#Mobile_Call_Event> <http://purl.org/dc/elements/1.1/title> "Mobile Call Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Mobile Call Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/event#Phone_Call_Event> .
+	
+	<http://ion.com/event#Network_Event> <http://purl.org/dc/elements/1.1/title> "Network Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Network Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/event#Event> .
+	
+	<http://ion.com/event#Office_Call_Event> <http://purl.org/dc/elements/1.1/title> "Office Call Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Office Call Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/event#Phone_Call_Event> .
+	
+	<http://ion.com/event#Phone_Call_Event> <http://purl.org/dc/elements/1.1/title> "Phone Call Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Phone Call Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/event#Event> .
+	
+	<http://ion.com/event#Print_Event> <http://purl.org/dc/elements/1.1/title> "Print Event" ;
+		a <http://www.w3.org/2002/07/owl#Class> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "Print Event" ;
+		<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://ion.com/event#Event> .
+	
+	<http://ion.com/event#p_has_called_individual> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Individual> ;
+		<http://purl.org/dc/elements/1.1/title> "has called individual" ;
+		a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Phone_Call_Event> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has called individual" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Individual> .
+	
+	<http://ion.com/event#p_has_calling_individual> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Individual> ;
+		<http://purl.org/dc/elements/1.1/title> "has calling individual" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Phone_Call_Event> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has calling individual" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Individual> .
+	
+	<http://ion.com/event#p_has_date_uri> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/event#Date_URI> ;
+		<http://purl.org/dc/elements/1.1/title> "has date uri" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Event> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has date uri" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/event#Date_URI> .
+	
+	<http://ion.com/event#p_has_date_uri_value> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://www.w3.org/2001/XMLSchema#string> ;
+		<http://purl.org/dc/elements/1.1/title> "has date uri value" ;
+		a <http://www.w3.org/2002/07/owl#DatatypeProperty> , <http://www.w3.org/2002/07/owl#FunctionalProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Date_URI> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has date uri value" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+	
+	<http://ion.com/event#p_has_device> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/event#Device> ;
+		<http://purl.org/dc/elements/1.1/title> "has device" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Event> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has device" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/event#Device> .
+	
+	<http://ion.com/event#p_has_main_individual> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Individual> ;
+		<http://purl.org/dc/elements/1.1/title> "has main individual" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Phone_Call_Event> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "has main individual" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Individual> .
+	
+	<http://ion.com/event#p_is_in_building> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/ref#Building> ;
+		<http://purl.org/dc/elements/1.1/title> "is in building" ;
+		a <http://www.w3.org/2002/07/owl#FunctionalProperty> , <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+		<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/event#Device> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "is in building" ;
+		<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/ref#Building> .

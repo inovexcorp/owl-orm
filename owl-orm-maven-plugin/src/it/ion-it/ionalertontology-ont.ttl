@@ -1,0 +1,24 @@
+
+<http://ion.com/alert> <http://purl.org/dc/elements/1.1/title> "ION Alert Ontology" ;
+	<http://purl.org/dc/terms/created> "2022-07-08T12:46:16.596Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+	<http://purl.org/dc/terms/creator> <http://openanzo.org/system/internal/sysadmin> ;
+	<http://purl.org/dc/terms/modified> "2022-08-05T06:48:07.631Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+	<http://purl.org/dc/terms/modifier> <http://openanzo.org/system/internal/sysadmin> ;
+	a <http://www.w3.org/2002/07/owl#Ontology> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "ION Alert Ontology" ;
+	<http://www.w3.org/2002/07/owl#imports> <http://ion.com/query> .
+
+<http://ion.com/alert#Alert> <http://purl.org/dc/elements/1.1/title> "Alert" ;
+	a <http://www.w3.org/2002/07/owl#Class> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Alert" .
+
+<http://ion.com/alert#Alert_Detail> <http://purl.org/dc/elements/1.1/title> "Alert Detail" ;
+	a <http://www.w3.org/2002/07/owl#Class> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Alert Detail" .
+
+<http://ion.com/alert#p_has_alert_detail> <http://openanzo.org/ontologies/2008/07/Anzo#range> <http://ion.com/alert#Alert_Detail> ;
+	<http://purl.org/dc/elements/1.1/title> "has alert detail" ;
+	a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+	<http://www.w3.org/2000/01/rdf-schema#domain> <http://ion.com/alert#Alert> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "has alert detail" ;
+	<http://www.w3.org/2000/01/rdf-schema#range> <http://ion.com/alert#Alert_Detail> .
