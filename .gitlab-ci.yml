@@ -62,6 +62,7 @@ release_on_main:
     - eval $(ssh-agent -s)
     - chmod 600 $SSH_KEY
     - ssh-add $SSH_KEY
+    - ssh-keyscan -H gitlab.inovexcorp.com >> ~/.ssh/known_hosts
   script:
     - git checkout -B main
     - mvn $MAVEN_CLI_OPTS release:prepare release:perform -B -DskipTests
