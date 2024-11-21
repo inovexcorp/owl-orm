@@ -96,13 +96,13 @@ public class DefaultValueConverterRegistry implements ValueConverterRegistry {
         return result;
     }
 
-    public <T> void register(Class<T> type, ValueConverter<T> converter) {
-        if (this.registry.containsKey(type)) {
-            this.registry.get(type).add(converter);
+    public <T> void register(ValueConverter<T> converter) {
+        if (this.registry.containsKey(converter.getType())) {
+            this.registry.get(converter.getType()).add(converter);
         } else {
             List<ValueConverter<?>> list = new ArrayList<>();
             list.add(converter);
-            this.registry.put(type, list);
+            this.registry.put(converter.getType(), list);
         }
     }
 }
