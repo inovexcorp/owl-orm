@@ -28,9 +28,10 @@ before_script:
 run_maven_build:
   stage: test
   only:
+    - main
     - merge_requests
   script:
-    - mvn ${MAVEN_CLI_OPTS} clean install -Prun-its ${MAVEN_OPTS}
+    - mvn ${MAVEN_CLI_OPTS} clean install -Prun-its
   artifacts:
     expire_in: 4 hrs
     paths:
@@ -40,7 +41,7 @@ run_maven_build:
 ################################################################################
 ## Trigger Maven release for commits to main branch
 ################################################################################
-main_release:
+release_on_main:
   stage: release
   # Only commits to main branch
   only:
@@ -63,10 +64,18 @@ main_release:
     - ssh-add $SSH_KEY
   script:
     - git checkout -B main
-    - mvn $MAVEN_CLI_OPTS release:prepare -B -DskipTests
-    - mvn $MAVEN_CLI_OPTS release:perform -B -DskipTests
-
-
+    - mvn $MAVEN_CLI_OPTS release:prepare release:perform -B -DskipTests
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        curl -u 'gitlab:iNovex2024!' -X POST \
+          -H "ta:+1" -H "Actions: view, Pipeline, ${CI_PIPELINE_URL}" \
+          -d "OWL-ORM release generation successful!" https://ntfy.realmone.com/owl-orm 
+      else
+        curl -u "gitlab:iNovex2024!" -X POST \
+          -H "Actions: view, Pipeline, ${CI_PIPELINE_URL}" \
+          -H "ta:-1" -d "OWL-ORM release generation failed..." https://ntfy.realmone.com/owl-orm 
+      fi
 
 ################################################################################
 ## Deploy to Nexus for tags matching vX.X.X
@@ -77,3 +86,14 @@ deploy_on_tag:
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/' # Runs only for tags matching vX.X.X pattern
   script:
     - mvn deploy
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        curl -u 'gitlab:iNovex2024!' -X POST \
+          -H "ta:+1" -H "Actions: view, Pipeline, ${CI_PIPELINE_URL}" \
+          -d "OWL-ORM deployment ($CI_COMMIT_TAG) to Nexus successful!" https://ntfy.realmone.com/owl-orm 
+      else
+        curl -u "gitlab:iNovex2024!" -X POST \
+          -H "Actions: view, Pipeline, ${CI_PIPELINE_URL}" \
+          -H "ta:-1" -d "OWL-ORM deployment ($CI_COMMIT_TAG) to nexus failed..." https://ntfy.realmone.com/owl-orm 
+      fi
