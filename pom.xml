@@ -96,7 +96,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
-                    <tagNameFormat>v${project.version}</tagNameFormat>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
                     <releaseProfiles>release</releaseProfiles>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>

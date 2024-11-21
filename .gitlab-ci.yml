@@ -1,33 +1,77 @@
 image: maven:3.9.6-amazoncorretto-17
+
 stages:
   - test
+  - release
   - deploy
 
-
 cache:
-  key: "$CI_BUILD_REF_NAME"
+  key: "$CI_COMMIT_REF_NAME"
   paths:
     - .m2/repository/
+
+variables:
+  GIT_DEPTH: 0
+  NEXUS_URL: "https://nexus.inovexcorp.com/nexus"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+  MAVEN_CLI_OPTS: "-T 1C --batch-mode --errors --show-version -Dsurefire.rerunFailingTestsCount=2 -Dfailsafe.rerunFailingTestsCount=2 -Dmaven.repo.local=.m2/repository"
+  DOCKER_TLS_CERTDIR: "/certs"
 
 
 before_script:
   # Copy settings.xml from runner into current docker container (/m2 is a mounted directory)
   - cp /m2/settings.xml ~/.m2/settings.xml
-  # Sets Version variables for use in job steps and updates pom to correct version for run
-  - DEPLOY_REPO=https://nexus.inovexcorp.com/nexus/content/repositories/foundry-maven-dev-hosted/ # Sets default repo to deploy to dev repo
-
 
 ################################################################################
-## Runs the maven build, to validate tests pass...
+## Run the full test suite for each merge request
 ################################################################################
 run_maven_build:
   stage: test
   only:
     - merge_requests
   script:
-    - mvn $MAVEN_CLI_OPTS clean install -Prun-its
+    - mvn ${MAVEN_CLI_OPTS} clean install -Prun-its ${MAVEN_OPTS}
   artifacts:
     expire_in: 4 hrs
     paths:
-      - "*/target/it/target/*"
+      - "*/target/*.jar"
   retry: 1
+
+################################################################################
+## Trigger Maven release for commits to main branch
+################################################################################
+main_release:
+  stage: release
+  only:
+    - main
+  except:
+    variables:
+      - $CI_COMMIT_TITLE =~ /^\[maven-release-plugin\].*$/
+  before_script:
+    # Copy settings.xml from runner into current docker container (/m2 is a mounted directory)
+    - cp /m2/settings.xml ~/.m2/settings.xml
+    # Sets Version variables for use in job steps and updates pom to correct version for run
+    - yum install -y -q git
+    - git config --global user.email 'gitlab.runner@inovexcorp.com'
+    - git config --global user.name 'Gitlab Runner'
+    - mkdir -p ~/.ssh/
+    - which ssh-agent || ( yum install openssh-client -y )
+    - eval $(ssh-agent -s)
+    - chmod 600 $SSH_KEY
+    - ssh-add $SSH_KEY
+  script:
+    - git checkout -B main
+    - mvn $MAVEN_CLI_OPTS release:prepare -B -DskipTests
+    - mvn $MAVEN_CLI_OPTS release:perform -B -DskipTests
+
+
+
+################################################################################
+## Deploy to Nexus for tags matching vX.X.X
+################################################################################
+deploy_on_tag:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/' # Runs only for tags matching vX.X.X pattern
+  script:
+    - mvn deploy

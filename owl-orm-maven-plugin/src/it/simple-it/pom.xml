@@ -40,6 +40,11 @@
                             <outputPackage>com.realmone.foaf</outputPackage>
                             <ontologyName>Friend of a Friend</ontologyName>
                         </ontology>
+                        <ontology>
+                            <ontologyFile>${project.basedir}/ionecommontology-ont.ttl</ontologyFile>
+                            <outputPackage>com.realmone.ion.ecomm</outputPackage>
+                            <ontologyName>ION Ecomm Ontology</ontologyName>
+                        </ontology>
                     </generates>
                     <enforceFullClosure>true</enforceFullClosure>
                     <isolateGenerationClosures>false</isolateGenerationClosures>
