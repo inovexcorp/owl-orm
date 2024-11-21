@@ -99,6 +99,7 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <releaseProfiles>release</releaseProfiles>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <scmCommentPrefix>[maven-release-plugin]</scmCommentPrefix>
                 </configuration>
             </plugin>
         </plugins>

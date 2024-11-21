@@ -42,8 +42,10 @@ run_maven_build:
 ################################################################################
 main_release:
   stage: release
+  # Only commits to main branch
   only:
     - main
+  # Ignoring any coming from the release plugin...
   except:
     variables:
       - $CI_COMMIT_TITLE =~ /^\[maven-release-plugin\].*$/
