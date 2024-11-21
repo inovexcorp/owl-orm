@@ -52,9 +52,9 @@ public class TestFactoryAndProxy {
 
     @BeforeClass
     public static void initRegistry() {
-        VALUE_CONVERTER_REGISTRY.register(String.class, new StringValueConverter());
-        VALUE_CONVERTER_REGISTRY.register(IRI.class, new IRIValueConverter());
-        VALUE_CONVERTER_REGISTRY.register(Resource.class, new ResourceValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(new StringValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(new IRIValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(new ResourceValueConverter());
     }
 
     private Model model;
