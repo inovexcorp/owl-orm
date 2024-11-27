@@ -40,6 +40,7 @@ run_maven_build:
     expire_in: 4 hrs
     paths:
       - "*/target/*.jar"
+      - "owl-orm-maven-plugin/target/it/*/build.log"
 
 
 ################################################################################
