@@ -58,10 +58,6 @@ ontologies.each { ontology ->
         throw new AssertionError("Expected file does not exist after ${timeoutSeconds} seconds: ${file.absolutePath}")
     }
 
-
-// Example usage
-    waitForFile(thingFile)
-
     // Parse the ontology file using RDF4J's Rio
     def rdfModel
     ontologyFile.withInputStream { inputStream ->
