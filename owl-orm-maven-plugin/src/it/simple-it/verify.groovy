@@ -44,17 +44,6 @@ ontologies.each { ontology ->
     def packageDir = new File(outputDir, expectedPackageDir)
     assert packageDir.exists() : "Expected generated package directory does not exist: ${packageDir.absolutePath}"
 
-    // Verify the expected Thing superclass
-    def thingFile = new File(packageDir, "${ontologyName.replaceAll('[^a-zA-Z0-9]', '')}Thing.java")
-    // Wait for a file to exist for up to 20 seconds
-    int waited = 0
-    while (!thingFile.exists() && waited < 20) {
-        println "Waiting for file to exist: ${thingFile.absolutePath}"
-        Thread.sleep(1000) // Wait 1 second
-        waited++
-    }
-    assert thingFile.exists() : "Expected Thing superclass file does not exist: ${thingFile.absolutePath}"
-
     // Parse the ontology file using RDF4J's Rio
     def rdfModel
     ontologyFile.withInputStream { inputStream ->
@@ -64,6 +53,10 @@ ontologies.each { ontology ->
 
     }
     assert rdfModel != null : "Issue reading data from ontology file: " + ontologyFile.absolutePath
+
+    // Verify the expected Thing superclass
+    def thingFile = new File(packageDir, "${ontologyName.replaceAll('[^a-zA-Z0-9]', '')}Thing.java")
+    assert thingFile.exists() : "Expected Thing superclass file does not exist: ${thingFile.absolutePath}"
 
     // Extract OWL classes and their dc:title values
     def classes = rdfModel.filter(null, RDF.TYPE, OWL.CLASS).subjects().collect { subject ->
