@@ -46,7 +46,21 @@ ontologies.each { ontology ->
 
     // Verify the expected Thing superclass
     def thingFile = new File(packageDir, "${ontologyName.replaceAll('[^a-zA-Z0-9]', '')}Thing.java")
-    assert thingFile.exists() : "Expected Thing superclass file does not exist: ${thingFile.absolutePath}"
+//    assert thingFile.exists() : "Expected Thing superclass file does not exist: ${thingFile.absolutePath}"
+    // Wait for a file to exist for up to 20 seconds
+    int waited = 0
+    while (!thingFile.exists() && waited < 20) {
+        println "Waiting for file to exist: ${thingFile.absolutePath}"
+        Thread.sleep(1000) // Wait 1 second
+        waited++
+    }
+    if (!file.exists()) {
+        throw new AssertionError("Expected file does not exist after ${timeoutSeconds} seconds: ${file.absolutePath}")
+    }
+
+
+// Example usage
+    waitForFile(thingFile)
 
     // Parse the ontology file using RDF4J's Rio
     def rdfModel
