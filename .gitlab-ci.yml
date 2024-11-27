@@ -42,6 +42,7 @@ run_maven_build:
     paths:
       - "*/target/*.jar"
       - "owl-orm-maven-plugin/target/it/*/build.log"
+      - "owl-orm-maven-plugin/target/it/*/target/generated-sources"
 
 
 ################################################################################
