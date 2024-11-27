@@ -38,6 +38,7 @@ run_maven_build:
     - mvn ${MAVEN_CLI_OPTS} -T 4 clean install -Prun-its
   artifacts:
     expire_in: 4 hrs
+    when: always
     paths:
       - "*/target/*.jar"
       - "owl-orm-maven-plugin/target/it/*/build.log"

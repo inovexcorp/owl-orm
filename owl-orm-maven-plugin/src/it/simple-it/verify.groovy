@@ -56,7 +56,6 @@ ontologies.each { ontology ->
         rdfModel = Rio.parse(inputStream, ontologyFile.toURI().toString(), format)
 
     }
-
     assert rdfModel != null : "Issue reading data from ontology file: " + ontologyFile.absolutePath
 
     // Extract OWL classes and their dc:title values
