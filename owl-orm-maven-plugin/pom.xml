@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.realmone</groupId>
         <artifactId>owl-orm</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>0.0.6</version>
     </parent>
     <artifactId>owl-orm-maven-plugin</artifactId>
     <name>OWL ORM Maven Plugin</name>
