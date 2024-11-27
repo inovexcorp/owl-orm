@@ -57,10 +57,12 @@ Add the following to your `pom.xml`:
                 </execution>
             </executions>
             <configuration>
+                <outputLocation>${project.build.directory}/generated-sources</outputLocation>
                 <generates>
                     <ontology>
-                        <ontologyFile>${project.basedir}/path/to/ontology.ttl</ontologyFile>
+                        <ontologyFile>${project.basedir}/src/main/resources/ontology.ttl</ontologyFile>
                         <outputPackage>com.example.generated</outputPackage>
+                       <ontologyName>My Awesome Ontology</ontologyName>
                     </ontology>
                 </generates>
             </configuration>
@@ -74,6 +76,66 @@ Run the following Maven command to generate Java classes:
 ```bash
 mvn generate-sources
 ```
+
+This will generate java interfaces into the `target/generated-sources` directory. Ensuring your IDE
+supports this as a gensrc directory will enable you to work with this generated source.
+
+#### Using the API
+Once you have generated your interfaces, you can work with them by leveraging the ThingFactory to build instances of
+them on top of RDF4j Model instances.  This process builds a delegated proxy that will allow you to operate on native
+java APIs while managing the underlying Model by adding/removing statements.
+
+```java
+// Basic Spring Usage example...
+package com.example.owlorm;
+
+import com.example.owlorm.config.RdfConfig;
+import com.example.owlorm.ontology.CustomOntologyClass;
+import com.realmone.owl.orm.ThingFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+
+import javax.annotation.PostConstruct;
+import java.util.Date;
+import java.util.UUID;
+
+@Service
+public class ExampleEntityService {
+
+   @Value("${rdf.mything.template:urn://thing/{uuid}}")
+   private String template;
+
+   private final ThingFactory thingFactory;
+
+   public ExampleEntityService(ThingFactory thingFactory) {
+      this.thingFactory = thingFactory;
+   }
+
+   @PostConstruct
+   public void createEntity() {
+      // Generate a unique IRI for the entity
+      String iriString = template.replace("{uuid}", UUID.randomUUID().toString());
+
+
+      // Create an instance of the ontology class
+      CustomOntologyClass entity = thingFactory.create(
+              CustomOntologyClass.class, // Generated with the ORM Maven Plugin
+              iriString, // String IRI representation for our thing
+              thingFactory.getModelFactory().createEmptyModel() // Pass your own Model in!
+      );
+
+      // Populate the entity with data
+      entity.setHasSomeDate(new Date());
+      entity.setHasSomeId("exampleHash");
+      entity.setHasSomeInt(42);
+      entity.setHasFloat(3.141592F);
+      // ... other DataType and Object Properties Natively...
+      // RDF4j Model is updated with each interaction
+   }
+}
+```
+
 
 ---
 ### **OWL ORM Types**
