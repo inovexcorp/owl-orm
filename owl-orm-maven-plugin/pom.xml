@@ -131,6 +131,7 @@
                                 <pomInclude>*/pom.xml</pomInclude>
                             </pomIncludes>
                             <postBuildHookScript>verify</postBuildHookScript>
+                            <failIfNoProjects>true</failIfNoProjects>
                             <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
                             <settingsFile>src/it/settings.xml</settingsFile>
                             <goals>
@@ -148,6 +149,23 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.eclipse.rdf4j</groupId>
+                                <artifactId>rdf4j-rio-api</artifactId>
+                                <version>${rdf4j.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.eclipse.rdf4j</groupId>
+                                <artifactId>rdf4j-model</artifactId>
+                                <version>${rdf4j.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.eclipse.rdf4j</groupId>
+                                <artifactId>rdf4j-rio-turtle</artifactId>
+                                <version>${rdf4j.version}</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                 </plugins>
             </build>

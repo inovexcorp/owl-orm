@@ -36,7 +36,7 @@
                             <ontologyName>BierOnto</ontologyName>
                         </ontology>
                         <ontology>
-                            <ontologyFile>${project.basedir}/foaf.owl</ontologyFile>
+                            <ontologyFile>${project.basedir}/foaf.ttl</ontologyFile>
                             <outputPackage>com.realmone.foaf</outputPackage>
                             <ontologyName>Friend of a Friend</ontologyName>
                         </ontology>
