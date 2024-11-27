@@ -38,7 +38,7 @@
                         <ontology>
                             <ontologyFile>${project.basedir}/foaf.ttl</ontologyFile>
                             <outputPackage>com.realmone.foaf</outputPackage>
-                            <ontologyName>Friend of a Friend</ontologyName>
+                            <ontologyName>FOAF</ontologyName>
                         </ontology>
                     </generates>
                     <enforceFullClosure>true</enforceFullClosure>
