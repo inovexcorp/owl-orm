@@ -14,7 +14,7 @@ variables:
   GIT_DEPTH: 0
   NEXUS_URL: "https://nexus.inovexcorp.com/nexus"
   MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --show-version -Dsurefire.rerunFailingTestsCount=2 -Dfailsafe.rerunFailingTestsCount=2 -Dmaven.repo.local=.m2/repository"
+  MAVEN_CLI_OPTS: "--errors --show-version -Dsurefire.rerunFailingTestsCount=2 -Dfailsafe.rerunFailingTestsCount=2 -Dmaven.repo.local=.m2/repository"
   DOCKER_TLS_CERTDIR: "/certs"
 
 
