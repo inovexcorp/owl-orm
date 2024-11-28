@@ -21,6 +21,10 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * This is a base implementation of the {@link Thing} interface that will allow generalized proxying of "things" defined
+ * in your OWL ontologies.
+ */
 public class BaseThing implements Thing {
 
     /**
@@ -56,7 +60,6 @@ public class BaseThing implements Thing {
 
     @Getter(AccessLevel.PACKAGE)
     protected boolean detached = false;
-
 
     @Builder(setterPrefix = "use")
     protected BaseThing(@NonNull Resource resource, @NonNull Model model, @NonNull IRI typeIri,
