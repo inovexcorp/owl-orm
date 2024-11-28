@@ -18,5 +18,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Type {
 
+    /**
+     * @return The IRI as a {@link String} that identifies the OWL Class that this interface describes
+     */
     String value();
 }
