@@ -4,7 +4,7 @@
 
     <groupId>com.realmone</groupId>
     <artifactId>owl-orm</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.8-SNAPSHOT</version>
     <name>OWL ORM</name>
     <description>OWL ORM provides a facade for working with native Java POJOs on top of an RDF4j model based on OWL
         ontologies. Instead of directly manipulating RDF statements, this framework enables developers to work with
@@ -66,7 +66,7 @@
         <connection>scm:git:https://github.com/inovexcorp/owl-orm.git</connection>
         <developerConnection>scm:git:git@github.com:inovexcorp/owl-orm.git</developerConnection>
         <url>https://github.com/inovexcorp/owl-orm</url>
-        <tag>v0.0.7</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
