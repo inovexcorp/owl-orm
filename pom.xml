@@ -70,13 +70,9 @@
     </scm>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>inovex</id>
+            <url>https://nexus.inovexcorp.com/nexus/content/repositories/public-maven-prod-hosted/</url>
         </repository>
     </distributionManagement>
 
