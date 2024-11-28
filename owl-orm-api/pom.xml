@@ -11,6 +11,7 @@
     <name>OWL ORM API</name>
     <description>A package that describes the interfaces and base logic for an ORM API on top of OWL ontologies
     </description>
+    <url>https://realmone.com/foundry</url>
     <packaging>bundle</packaging>
 
     <properties>

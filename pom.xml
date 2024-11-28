@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.realmone</groupId>
     <artifactId>owl-orm</artifactId>
     <version>0.0.7-SNAPSHOT</version>
+    <name>OWL ORM</name>
+    <description>OWL ORM provides a facade for working with native Java POJOs on top of an RDF4j model based on OWL
+        ontologies. Instead of directly manipulating RDF statements, this framework enables developers to work with
+        familiar Java objects, significantly simplifying business logic.
+    </description>
+    <url>https://realmone.com/foundry</url>
     <packaging>pom</packaging>
+
     <modules>
         <module>owl-orm-api</module>
         <module>owl-orm-engine</module>

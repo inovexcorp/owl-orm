@@ -10,6 +10,7 @@
     <artifactId>owl-orm-engine</artifactId>
     <name>OWL ORM Engine</name>
     <description>The logic engine that implements the OWL ORM API</description>
+    <url>https://realmone.com/foundry</url>
     <packaging>bundle</packaging>
 
     <dependencies>

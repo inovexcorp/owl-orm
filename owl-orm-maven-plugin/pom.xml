@@ -8,10 +8,8 @@
     <artifactId>owl-orm-maven-plugin</artifactId>
     <name>OWL ORM Maven Plugin</name>
     <description>A maven plugin for generating OWL ORM implementations for configured OWL ontologies</description>
+    <url>https://realmone.com/foundry</url>
     <packaging>maven-plugin</packaging>
-
-    <!-- FIXME change it to the project's website -->
-    <url>https://mobi.solutions</url>
 
     <dependencies>
         <dependency>

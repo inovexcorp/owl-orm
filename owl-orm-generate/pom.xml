@@ -10,6 +10,7 @@
     <artifactId>owl-orm-generate</artifactId>
     <name>OWL ORM Code Generator</name>
     <description>The module that will understand OWL Ontologies and generate source code facades</description>
+    <url>https://realmone.com/foundry</url>
 
     <dependencies>
         <dependency>
