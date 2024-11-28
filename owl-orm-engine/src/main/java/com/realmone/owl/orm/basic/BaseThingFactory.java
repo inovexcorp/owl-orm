@@ -56,8 +56,18 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
+    public <T extends Thing> T create(Class<T> type, Resource resource) throws OrmException {
+        return create(type, resource, modelFactory.createEmptyModel());
+    }
+
+    @Override
     public <T extends Thing> T create(Class<T> type, String resource, Model model) throws OrmException {
         return create(type, valueFactory.createIRI(resource), model);
+    }
+
+    @Override
+    public <T extends Thing> T create(Class<T> type, String resource) throws OrmException {
+        return create(type, valueFactory.createIRI(resource), modelFactory.createEmptyModel());
     }
 
     @Override
