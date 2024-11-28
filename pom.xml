@@ -64,9 +64,9 @@
     </dependencies>
 
     <scm>
-        <connection>scm:git:git://github.com/inovexcorp/owl-orm.git</connection>
-        <developerConnection>scm:git:ssh://github.com:inovexcorp/owl-orm.git</developerConnection>
-        <url>https://github.com/inovexcorp/owl-orm/tree/master</url>
+        <connection>scm:git:https://github.com/inovexcorp/owl-orm.git</connection>
+        <developerConnection>scm:git:git@github.com:inovexcorp/owl-orm.git</developerConnection>
+        <url>https://github.com/inovexcorp/owl-orm</url>
         <tag>HEAD</tag>
     </scm>
 
