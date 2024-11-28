@@ -28,11 +28,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Handles method invocation for proxies of OWL ORM entities. This class intercepts method calls on
+ * {@link Thing} objects and routes them to either the delegate or custom logic depending on the method type.
+ */
 public class OwlOrmInvocationHandler implements InvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OwlOrmInvocationHandler.class);
+
+    /** RDF4j ValueFactory used for creating IRIs and other RDF values. */
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
+    // Method name prefixes for identifying common method types
     private static final String GET_PREFIX = "get";
     private static final String IS_PREFIX = "is";
     private static final String SET_PREFIX = "set";
@@ -40,11 +47,23 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     private static final String REMOVEFROM_PREFIX = "removeFrom";
     private static final String CLEAROUT_PREFIX = "clearOut";
 
+    /** RDF model that serves as the data store for the proxy object. */
     private final Model model;
+    /** Factory for creating instances of {@link Thing}. */
     private final ThingFactory thingFactory;
+    /** Delegate object representing the core functionality of the proxy. */
     private final BaseThing delegate;
+    /** Registry for managing {@link ValueConverter} instances. */
     private final ValueConverterRegistry valueConverterRegistry;
 
+    /**
+     * Constructs an instance of the {@link OwlOrmInvocationHandler}.
+     *
+     * @param model The RDF4j model backing this proxy instance.
+     * @param delegate The delegate object representing the base functionality.
+     * @param valueConverterRegistry The registry for managing value conversion.
+     * @param factory The {@link ThingFactory} for creating {@link Thing} instances.
+     */
     @Builder(setterPrefix = "use")
     protected OwlOrmInvocationHandler(Model model, BaseThing delegate,
                                       ValueConverterRegistry valueConverterRegistry, ThingFactory factory) {
@@ -55,10 +74,13 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * The base logic that intercepts method calls against proxied instances of {@link Thing} extensions.  This allows
-     * our underlying engine to work without implementations of our OWL ORM "thing" interfaces.
+     * Intercepts method calls on the proxy object and either delegates them to the base implementation
+     * or handles them as OWL ORM-specific operations.
+     *
+     * @param proxy The proxy instance.
+     * @param method The method being called.
+     * @param args The arguments passed to the method.
+     * @return The result of the method invocation.
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
@@ -71,9 +93,9 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * This toString implementation allows us to represent the resource and type of the thing we're working with.
+     * Provides a string representation of this handler and the associated delegate.
+     *
+     * @return A string describing this handler.
      */
     @Override
     public String toString() {
