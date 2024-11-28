@@ -20,7 +20,10 @@ import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
@@ -37,8 +40,12 @@ public class TestFactoryAndProxy {
 
     private static final DefaultValueConverterRegistry VALUE_CONVERTER_REGISTRY = new DefaultValueConverterRegistry();
 
-    private static final ThingFactory THING_FACTORY = new BaseThingFactory(VALUE_CONVERTER_REGISTRY, MODEL_FACTORY,
-            VALUE_FACTORY);
+    private static final ThingFactory THING_FACTORY = BaseThingFactory.builder()
+            .modelFactory(MODEL_FACTORY)
+            .valueFactory(VALUE_FACTORY)
+            .valueConverterRegistry(VALUE_CONVERTER_REGISTRY)
+            .build();
+
 
     @BeforeClass
     public static void initRegistry() {

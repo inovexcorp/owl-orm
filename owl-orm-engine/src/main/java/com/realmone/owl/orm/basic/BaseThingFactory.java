@@ -12,33 +12,36 @@ import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
+import lombok.*;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 
 import java.lang.reflect.Proxy;
 import java.util.Optional;
 
+/**
+ * This is the base implementation of the {@link ThingFactory} interface. This is the front door for working with OWL
+ * ORM API interfaces in your code. It allows the creation of proxy instances of OWL ORM interfaces that will overlay
+ * RDF4j models.  Use the builder to create an instance of this class for your solution.
+ */
+@Builder
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseThingFactory implements ThingFactory {
 
-    private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
+    @NonNull
+    private final ValueConverterRegistry valueConverterRegistry;
 
-    private ValueConverterRegistry valueConverterRegistry;
-
+    @NonNull
+    @Getter
     private final ModelFactory modelFactory;
+    @NonNull
+    @Getter
     private final ValueFactory valueFactory;
-
-    public BaseThingFactory(ValueConverterRegistry valueConverterRegistry,
-                            ModelFactory modelFactory, ValueFactory valueFactory) {
-        this.valueConverterRegistry = valueConverterRegistry;
-        this.modelFactory = modelFactory;
-        this.valueFactory = valueFactory;
-    }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
-        IRI typeIri = VALUE_FACTORY.createIRI(annotation.value());
+        IRI typeIri = valueFactory.createIRI(annotation.value());
         OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
                 .useFactory(this)
                 .useValueConverterRegistry(valueConverterRegistry)
@@ -74,7 +77,7 @@ public class BaseThingFactory implements ThingFactory {
     @SuppressWarnings("unchecked")
     public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
-        IRI typeIri = VALUE_FACTORY.createIRI(annotation.value());
+        IRI typeIri = valueFactory.createIRI(annotation.value());
         BaseThing delegate = BaseThing.builder()
                 .useModel(model)
                 .useResource(resource)
@@ -97,18 +100,12 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
-    public ValueFactory getValueFactory() {
-        return valueFactory;
-    }
-
-    @Override
-    public ModelFactory getModelFactory() {
-        return modelFactory;
+    public <T extends Thing> Optional<T> get(Class<T> type, String resource, Model model) throws OrmException {
+        return get(type, valueFactory.createIRI(resource), model);
     }
 
     private <T extends Thing> Type getTypeAnnotation(Class<T> type) {
         Type typeAnn = type.getDeclaredAnnotation(Type.class);
-
         if (typeAnn == null) {
             throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
         }
