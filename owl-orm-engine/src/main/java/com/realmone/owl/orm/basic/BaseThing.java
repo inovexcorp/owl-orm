@@ -19,15 +19,20 @@ package com.realmone.owl.orm.basic;
 
 import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
-import com.realmone.owl.orm.types.ValueConverter;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.eclipse.rdf4j.model.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,6 +57,10 @@ public class BaseThing implements Thing {
     @NonNull
     protected final Model model;
 
+    @Getter
+    @NonNull
+    protected final Set<IRI> parents;
+
     /**
      * The IRI of the type of thing we're working with.
      */
@@ -69,16 +78,18 @@ public class BaseThing implements Thing {
 
 
     @Builder(setterPrefix = "use")
-    protected BaseThing(@NonNull Resource resource, @NonNull Model model, @NonNull IRI typeIri,
+    protected BaseThing(@NonNull Resource resource, @NonNull Model model, @NonNull IRI typeIri, Set<IRI> parents,
                         @NonNull ValueConverterRegistry registry, boolean create) {
         this.resource = resource;
         this.model = model;
+        this.parents = parents != null ? parents : new HashSet<>();
         this.typeIri = typeIri;
         this.valueConverterRegistry = registry;
         boolean exists = !model.filter(resource, RDF.TYPE, typeIri).isEmpty();
         if (!exists) {
             if (create) { // If it doesn't exist and we are creating, add the statement.
                 this.model.add(resource, RDF.TYPE, typeIri);
+                this.parents.forEach(parent -> this.model.add(resource, RDF.TYPE, parent));
             } else { // If it doesn't exist and we are not creating, note that we are detached for the facade...
                 detached = true;
             }

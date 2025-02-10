@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * A class that represents a owl Thing.  Basically a base structure for all things in the
+ * A class that represents a owl Thing. Basically a base structure for all things in the
  * owl ontology universe to extend.
  */
 public interface Thing {
@@ -42,7 +42,12 @@ public interface Thing {
     Model getModel();
 
     /**
-     * Get a {@link Value} from the given prediciate {@link IRI}.
+     * @return The list of parent class IRIs for the type of this {@link Thing}
+     */
+    Set<IRI> getParents();
+
+    /**
+     * Get a {@link Value} from the given predicate {@link IRI}.
      *
      * @param predicate The predicate identifying the property
      * @param context   The context {@link IRI}

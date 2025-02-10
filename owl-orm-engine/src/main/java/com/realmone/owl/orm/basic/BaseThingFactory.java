@@ -22,17 +22,26 @@ import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ModelFactory;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BaseThingFactory implements ThingFactory {
 
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
-    private ValueConverterRegistry valueConverterRegistry;
+    private final ValueConverterRegistry valueConverterRegistry;
 
     private final ModelFactory modelFactory;
     private final ValueFactory valueFactory;
@@ -48,6 +57,11 @@ public class BaseThingFactory implements ThingFactory {
     @SuppressWarnings("unchecked")
     public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
+        Set<IRI> parents = getAllExtendedOrImplementedTypesRecursively(type).stream()
+                .map(parentClazz -> getTypeAnnotation((Class<? extends Thing>) parentClazz))
+                .map(parentType -> VALUE_FACTORY.createIRI(parentType.value()))
+                .collect(Collectors.toSet());
+        parents.forEach(System.out::println);
         IRI typeIri = VALUE_FACTORY.createIRI(annotation.value());
         OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
                 .useFactory(this)
@@ -57,6 +71,7 @@ public class BaseThingFactory implements ThingFactory {
                         .useModel(model)
                         .useResource(resource)
                         .useTypeIri(typeIri)
+                        .useParents(parents)
                         .useRegistry(valueConverterRegistry)
                         .useCreate(true)
                         .build())
@@ -113,5 +128,20 @@ public class BaseThingFactory implements ThingFactory {
             throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
         }
         return typeAnn;
+    }
+
+    public Set<Class<?>> getAllExtendedOrImplementedTypesRecursively(final Class<?> clazz) {
+        return walk(clazz)
+                .filter(Predicate.isEqual(clazz).negate())
+                .filter(Predicate.isEqual(Thing.class).negate())
+                .collect(Collectors.toSet());
+    }
+
+    public Stream<Class<?>> walk(final Class<?> c) {
+        return Stream.concat(Stream.of(c),
+                Stream.concat(
+                        Optional.ofNullable(c.getSuperclass()).stream(),
+                        Arrays.stream(c.getInterfaces())
+                ).flatMap(this::walk));
     }
 }

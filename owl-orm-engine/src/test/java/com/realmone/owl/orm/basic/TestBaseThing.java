@@ -62,6 +62,7 @@ public class TestBaseThing {
         Assert.assertEquals("Expected a single statement with our thing, and a type (2 stmts total)",
                 2, thing.getModel().size());
         Assert.assertEquals(thingResource, thing.getResource());
+        Assert.assertEquals(0, thing.getParents().size());
     }
 
     @Test
