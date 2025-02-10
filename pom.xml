@@ -4,8 +4,15 @@
 
     <groupId>com.realmone</groupId>
     <artifactId>owl-orm</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.9-SNAPSHOT</version>
+    <name>OWL ORM</name>
+    <description>OWL ORM provides a facade for working with native Java POJOs on top of an RDF4j model based on OWL
+        ontologies. Instead of directly manipulating RDF statements, this framework enables developers to work with
+        familiar Java objects, significantly simplifying business logic.
+    </description>
+    <url>https://realmone.com/foundry</url>
     <packaging>pom</packaging>
+
     <modules>
         <module>owl-orm-api</module>
         <module>owl-orm-engine</module>
@@ -27,11 +34,18 @@
     </properties>
 
     <dependencies>
+        <!-- lombok for code brevity -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- Uses slf4j logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
@@ -42,11 +56,6 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
@@ -54,9 +63,9 @@
     </dependencies>
 
     <scm>
-        <connection>scm:git:git@gitlab.inovexcorp.com:matonto/owl-orm.git</connection>
-        <developerConnection>scm:git:git@gitlab.inovexcorp.com:matonto/owl-orm.git</developerConnection>
-        <url>https://gitlab.inovexcorp.com/matonto/owl-orm</url>
+        <connection>scm:git:https://github.com/inovexcorp/owl-orm.git</connection>
+        <developerConnection>scm:git:git@github.com:inovexcorp/owl-orm.git</developerConnection>
+        <url>https://github.com/inovexcorp/owl-orm</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -69,39 +78,126 @@
 
     <build>
         <plugins>
+            <!-- Plugin for source generation -->
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>4.6</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
-                        <id>default</id>
+                        <id>attach-sources</id>
                         <goals>
-                            <goal>check</goal>
-                            <goal>format</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <header>license-header.txt</header>
-                    <strictCheck>true</strictCheck>
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
             </plugin>
+            <!-- Plugin for Javadoc generation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <tagNameFormat>v${project.version}</tagNameFormat>
-                    <releaseProfiles>release</releaseProfiles>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
+    <developers>
+        <developer>
+            <name>Ben Gould</name>
+            <email>ben.gould@realmone.com</email>
+            <organization>RealmOne Foundry</organization>
+            <organizationUrl>https://realmone.com/foundry</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Sonatype Central -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.6.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                        </configuration>
+                    </plugin>
+                    <!-- Release plugin configuration -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <version>3.1.1</version>
+                        <configuration>
+                            <tagNameFormat>v@{project.version}</tagNameFormat>
+                            <releaseProfiles>release</releaseProfiles>
+                            <autoVersionSubmodules>true</autoVersionSubmodules>
+                            <scmCommentPrefix>[maven-release-plugin]</scmCommentPrefix>
+                        </configuration>
+                    </plugin>
+                    <!-- Licensing -->
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>4.6</version>
+                        <executions>
+                            <execution>
+                                <id>default</id>
+                                <goals>
+                                    <goal>check</goal>
+                                    <goal>format</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <header>header.txt</header>
+                            <strictCheck>true</strictCheck>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                        </configuration>
+                    </plugin>
+                    <!-- Maven GPG Plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -3,17 +3,7 @@
  *   owl-orm: A Maven Plugin and API for working with POJOs representing ontological classes on top of RDF4j
  *   Copyright (c) 2024 RealmOne (https://realmone.com/)
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *   Licensed under the MIT License
  */
 package com.realmone.owl.orm.basic;
 
@@ -22,6 +12,11 @@ import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ModelFactory;
@@ -37,21 +32,27 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * This is the base implementation of the {@link ThingFactory} interface. This is the front door for working with OWL
+ * ORM API interfaces in your code. It allows the creation of proxy instances of OWL ORM interfaces that will overlay
+ * RDF4j models.  Use the builder to create an instance of this class for your solution.
+ */
+@Builder
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseThingFactory implements ThingFactory {
 
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
+    @NonNull
     private final ValueConverterRegistry valueConverterRegistry;
 
+    @NonNull
+    @Getter
     private final ModelFactory modelFactory;
-    private final ValueFactory valueFactory;
 
-    public BaseThingFactory(ValueConverterRegistry valueConverterRegistry,
-                            ModelFactory modelFactory, ValueFactory valueFactory) {
-        this.valueConverterRegistry = valueConverterRegistry;
-        this.modelFactory = modelFactory;
-        this.valueFactory = valueFactory;
-    }
+    @NonNull
+    @Getter
+    private final ValueFactory valueFactory;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -81,15 +82,25 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
+    public <T extends Thing> T create(Class<T> type, Resource resource) throws OrmException {
+        return create(type, resource, modelFactory.createEmptyModel());
+    }
+
+    @Override
     public <T extends Thing> T create(Class<T> type, String resource, Model model) throws OrmException {
         return create(type, valueFactory.createIRI(resource), model);
+    }
+
+    @Override
+    public <T extends Thing> T create(Class<T> type, String resource) throws OrmException {
+        return create(type, valueFactory.createIRI(resource), modelFactory.createEmptyModel());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
-        IRI typeIri = VALUE_FACTORY.createIRI(annotation.value());
+        IRI typeIri = valueFactory.createIRI(annotation.value());
         BaseThing delegate = BaseThing.builder()
                 .useModel(model)
                 .useResource(resource)
@@ -112,18 +123,12 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
-    public ValueFactory getValueFactory() {
-        return valueFactory;
-    }
-
-    @Override
-    public ModelFactory getModelFactory() {
-        return modelFactory;
+    public <T extends Thing> Optional<T> get(Class<T> type, String resource, Model model) throws OrmException {
+        return get(type, valueFactory.createIRI(resource), model);
     }
 
     private <T extends Thing> Type getTypeAnnotation(Class<T> type) {
         Type typeAnn = type.getDeclaredAnnotation(Type.class);
-
         if (typeAnn == null) {
             throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
         }

@@ -3,17 +3,7 @@
  *   owl-orm: A Maven Plugin and API for working with POJOs representing ontological classes on top of RDF4j
  *   Copyright (c) 2024 RealmOne (https://realmone.com/)
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *   Licensed under the MIT License
  */
 package com.realmone.owl.orm.generate;
 
@@ -45,12 +35,14 @@ import java.util.Map;
 import java.util.Set;
 
 @Getter
-public class GeneratingOntology extends AbstractOntology implements ClosureIndex {
+public class GeneratingOntology extends AbstractOntology {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneratingOntology.class);
 
     private final JPackage jPackage;
+    private final String ontologyName;
     private final Resource ontologyResource;
+    private final JDefinedClass ontologyThing;
     private final Set<Resource> imports = new HashSet<>();
     private final Set<Resource> classIris = new HashSet<>();
     private final Map<Resource, Set<Resource>> classHierarchy = new HashMap<>();
@@ -66,24 +58,26 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
         super(sourceGenerator, codeModel);
         this.jPackage = codeModel._package(ontologyPackage);
         this.model = ontologyModel;
-        this.ontologyResource = getOntologyResource(model, ontologyName);
+        this.ontologyName = ontologyName;
+        this.ontologyResource = getOntologyResource(model);
         closureModel.addAll(ontologyModel);
         closureModel.addAll(referenceModel);
+        this.ontologyThing = generateOntologyThing();
         Set<Resource> missingOntologies = GraphUtils.missingOntologies(closureModel, ontologyResource);
         if (!missingOntologies.isEmpty()) {
             if (enforceFullClosure) {
                 throw new OrmGenerationException(String.format("Ontology %s is missing import(s): %s",
                         ontologyResource.stringValue(), StringUtils.join(missingOntologies, ", ")));
             } else if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn(String.format("Ontology %s is missing import(s): %s",
-                        ontologyResource.stringValue(), StringUtils.join(missingOntologies, ", ")));
+                LOGGER.warn("Ontology {} is missing import(s): {}", ontologyResource.stringValue(),
+                        StringUtils.join(missingOntologies, ", "));
             }
         }
         // Warn about missing ontologies.
         analyzeAndGenerate();
     }
 
-    private Resource getOntologyResource(Model model, String ontologyName) {
+    private Resource getOntologyResource(Model model) {
         final Set<Resource> ontologiesInModel = model.filter(null, RDF.TYPE, OWL.ONTOLOGY).subjects();
         if (ontologiesInModel.size() > 1) {
             throw new OrmException(String.format("More than one ontology in file '%s': %s",
@@ -158,15 +152,37 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
                                 .build()));
         // Attach properties to interfaces...
         datatypeProperties.forEach((propResource, property) ->
-                property.getDomain().stream().map(classIndex::get)
-                        .filter(JDefinedClass.class::isInstance)
-                        .map(JDefinedClass.class::cast)
-                        .forEach(property::attach));
-        objectProperties.forEach((propResource, property) ->
-                property.getDomain().stream().map(classIndex::get)
-                        .filter(JDefinedClass.class::isInstance)
-                        .map(JDefinedClass.class::cast)
-                        .forEach(property::attach));
+        {
+            property.getDomain().stream().map(classIndex::get)
+                    .filter(JDefinedClass.class::isInstance)
+                    .map(JDefinedClass.class::cast)
+                    .forEach(property::attach);
+            if (property.getDomain().isEmpty()) {
+                property.attach(ontologyThing);
+            }
+        });
+        objectProperties.forEach((propResource, property) -> {
+            property.getDomain().stream().map(classIndex::get)
+                    .filter(JDefinedClass.class::isInstance)
+                    .map(JDefinedClass.class::cast)
+                    .forEach(property::attach);
+            if (property.getDomain().isEmpty()) {
+                property.attach(ontologyThing);
+            }
+        });
+    }
+
+    private JDefinedClass generateOntologyThing() throws OrmException {
+        try {
+            JDefinedClass ontThing = jPackage._interface(JMod.PUBLIC,
+                    NamingUtilities.safeName(ontologyName + " Thing", true));
+            ontThing._extends(Thing.class);
+            // Annotate?
+            // Javadoc?
+            return ontThing;
+        } catch (JClassAlreadyExistsException e) {
+            throw new OrmException("Issue generating ontology thing; already exists!", e);
+        }
     }
 
     private JDefinedClass generateInterface(Resource resource)
@@ -175,7 +191,7 @@ public class GeneratingOntology extends AbstractOntology implements ClosureIndex
             // Create the interface in our package.
             JDefinedClass interfaze = jPackage._interface(JMod.PUBLIC,
                     NamingUtilities.getClassName(model, resource));
-            interfaze._extends(Thing.class);
+            interfaze._extends(ontologyThing);
             // Annotate the interface with our @Type interface to help wire proxy objects later.
             interfaze.annotate(Type.class).param("value", resource.stringValue());
             // Mark up the interface with appropriate comments and standard annotations.

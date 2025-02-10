@@ -3,17 +3,7 @@
  *   owl-orm: A Maven Plugin and API for working with POJOs representing ontological classes on top of RDF4j
  *   Copyright (c) 2024 RealmOne (https://realmone.com/)
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *   Licensed under the MIT License
  */
 package com.realmone.owl.orm.basic;
 
@@ -30,7 +20,10 @@ import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
@@ -47,14 +40,18 @@ public class TestFactoryAndProxy {
 
     private static final DefaultValueConverterRegistry VALUE_CONVERTER_REGISTRY = new DefaultValueConverterRegistry();
 
-    private static final ThingFactory THING_FACTORY = new BaseThingFactory(VALUE_CONVERTER_REGISTRY, MODEL_FACTORY,
-            VALUE_FACTORY);
+    private static final ThingFactory THING_FACTORY = BaseThingFactory.builder()
+            .modelFactory(MODEL_FACTORY)
+            .valueFactory(VALUE_FACTORY)
+            .valueConverterRegistry(VALUE_CONVERTER_REGISTRY)
+            .build();
+
 
     @BeforeClass
     public static void initRegistry() {
-        VALUE_CONVERTER_REGISTRY.register(String.class, new StringValueConverter());
-        VALUE_CONVERTER_REGISTRY.register(IRI.class, new IRIValueConverter());
-        VALUE_CONVERTER_REGISTRY.register(Resource.class, new ResourceValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(new StringValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(new IRIValueConverter());
+        VALUE_CONVERTER_REGISTRY.register(new ResourceValueConverter());
     }
 
     private Model model;

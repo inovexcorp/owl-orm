@@ -3,15 +3,13 @@
     <parent>
         <groupId>com.realmone</groupId>
         <artifactId>owl-orm</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.9-SNAPSHOT</version>
     </parent>
     <artifactId>owl-orm-maven-plugin</artifactId>
     <name>OWL ORM Maven Plugin</name>
     <description>A maven plugin for generating OWL ORM implementations for configured OWL ontologies</description>
+    <url>https://realmone.com/foundry</url>
     <packaging>maven-plugin</packaging>
-
-    <!-- FIXME change it to the project's website -->
-    <url>https://mobi.solutions</url>
 
     <dependencies>
         <dependency>
@@ -119,7 +117,6 @@
         <profile>
             <id>run-its</id>
             <build>
-
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -132,6 +129,7 @@
                                 <pomInclude>*/pom.xml</pomInclude>
                             </pomIncludes>
                             <postBuildHookScript>verify</postBuildHookScript>
+                            <failIfNoProjects>true</failIfNoProjects>
                             <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
                             <settingsFile>src/it/settings.xml</settingsFile>
                             <goals>
@@ -149,9 +147,25 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.eclipse.rdf4j</groupId>
+                                <artifactId>rdf4j-rio-api</artifactId>
+                                <version>${rdf4j.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.eclipse.rdf4j</groupId>
+                                <artifactId>rdf4j-model</artifactId>
+                                <version>${rdf4j.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.eclipse.rdf4j</groupId>
+                                <artifactId>rdf4j-rio-turtle</artifactId>
+                                <version>${rdf4j.version}</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                 </plugins>
-
             </build>
         </profile>
     </profiles>

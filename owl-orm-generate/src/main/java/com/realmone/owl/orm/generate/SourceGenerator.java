@@ -3,17 +3,7 @@
  *   owl-orm: A Maven Plugin and API for working with POJOs representing ontological classes on top of RDF4j
  *   Copyright (c) 2024 RealmOne (https://realmone.com/)
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *   Licensed under the MIT License
  */
 package com.realmone.owl.orm.generate;
 
@@ -73,15 +63,8 @@ public class SourceGenerator implements Runnable {
         } catch (FileSystemException e) {
             throw new OrmGenerationException("Issue initializing VFS system to fetch ontologies!", e);
         }
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("prolog.txt")) {
-            if (is != null) {
-                this.prolog = IOUtils.toString(is, Charset.defaultCharset());
-            } else {
-                throw new OrmGenerationException("Prolog file could not be found");
-            }
-        } catch (IOException e) {
-            throw new OrmGenerationException("Issue loading prolog data for file headers", e);
-        }
+        // Load prolog header.
+        this.prolog = loadProlog();
         // Initialize our reference closure.
         this.references = new HashSet<>(includeGeneratedOntologiesInReferences ?
                 referenceOntologies.size() + generateForOntologies.size() : referenceOntologies.size());
@@ -100,6 +83,18 @@ public class SourceGenerator implements Runnable {
                 .useOntologyName(wrapper.getOntologyName())
                 .useEnforceFullClosure(enforceFullClosure == null || enforceFullClosure)
                 .build()));
+    }
+
+    private String loadProlog(){
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("prolog.txt")) {
+            if (is != null) {
+                return IOUtils.toString(is, Charset.defaultCharset());
+            } else {
+                throw new OrmGenerationException("Prolog file could not be found");
+            }
+        } catch (IOException e) {
+            throw new OrmGenerationException("Issue loading prolog data for file headers", e);
+        }
     }
 
     private void loadReference(OntologyMeta wrapper) {

@@ -3,17 +3,7 @@
  *   owl-orm: A Maven Plugin and API for working with POJOs representing ontological classes on top of RDF4j
  *   Copyright (c) 2024 RealmOne (https://realmone.com/)
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *   Licensed under the MIT License
  */
 package com.realmone.owl.orm.generate;
 
@@ -34,17 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ReferenceOntology extends AbstractOntology implements ClosureIndex {
+@Getter
+public class ReferenceOntology extends AbstractOntology {
 
-    @Getter
     private final Resource ontologyResource;
-    @Getter
     private final Model model;
-    @Getter
     private final String packageName;
-    @Getter
     private final String ontologyName;
-    @Getter
     private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
 
 
