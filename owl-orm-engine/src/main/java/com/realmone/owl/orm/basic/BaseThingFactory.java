@@ -16,7 +16,12 @@ import lombok.*;
 import org.eclipse.rdf4j.model.*;
 
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This is the base implementation of the {@link ThingFactory} interface. This is the front door for working with OWL
@@ -33,6 +38,7 @@ public class BaseThingFactory implements ThingFactory {
     @NonNull
     @Getter
     private final ModelFactory modelFactory;
+
     @NonNull
     @Getter
     private final ValueFactory valueFactory;
@@ -41,6 +47,10 @@ public class BaseThingFactory implements ThingFactory {
     @SuppressWarnings("unchecked")
     public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
+        Set<IRI> parents = getAllExtendedOrImplementedTypesRecursively(type).stream()
+                .map(parentClazz -> getTypeAnnotation((Class<? extends Thing>) parentClazz))
+                .map(parentType -> valueFactory.createIRI(parentType.value()))
+                .collect(Collectors.toSet());
         IRI typeIri = valueFactory.createIRI(annotation.value());
         OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
                 .useFactory(this)
@@ -50,6 +60,7 @@ public class BaseThingFactory implements ThingFactory {
                         .useModel(model)
                         .useResource(resource)
                         .useTypeIri(typeIri)
+                        .useParents(parents)
                         .useRegistry(valueConverterRegistry)
                         .useCreate(true)
                         .build())
@@ -104,11 +115,50 @@ public class BaseThingFactory implements ThingFactory {
         return get(type, valueFactory.createIRI(resource), model);
     }
 
-    private <T extends Thing> Type getTypeAnnotation(Class<T> type) {
+    /**
+     * Get the type annotation for a given {@link Class} representing a OWL ORM {@link Thing}.
+     *
+     * @param type The type of {@link Class} being inspected
+     * @param <T>  The type of {@link Class} that was passed in
+     * @return The {@link Type} annotation on that {@link Class} or an {@link IllegalStateException}
+     */
+    private static <T extends Thing> Type getTypeAnnotation(Class<T> type) {
         Type typeAnn = type.getDeclaredAnnotation(Type.class);
         if (typeAnn == null) {
             throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
         }
         return typeAnn;
+    }
+
+    /**
+     * This class will recursively get a set of all the {@link Class}es that are extended or interfaces implemented
+     * by a given root {@link Class}.
+     *
+     * @param clazz The root {@link Class} to start from
+     * @return The {@link Set} of {@link Class} entities that affect the root {@link Class} hierarchy.
+     */
+    public static Set<Class<?>> getAllExtendedOrImplementedTypesRecursively(final Class<?> clazz) {
+        return walk(clazz)
+                .filter(Predicate.isEqual(clazz).negate())
+                .filter(Predicate.isEqual(Thing.class).negate())
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * This method simply will return a stream that contains the ancestors/class hierarchy for a given {@link Class}.
+     *
+     * @param clazz The root {@link Class} to walk
+     * @return A {@link Stream} of {@link Class} entities that represent the class and its ancestors
+     */
+    public static Stream<Class<?>> walk(final Class<?> clazz) {
+        // Return the concatenated stream of the root class
+        return Stream.concat(Stream.of(clazz),
+                // Concatenate two other streams :)
+                Stream.concat(
+                        // include the parent/super class (extends)
+                        Optional.ofNullable(clazz.getSuperclass()).stream(),
+                        // and all the interfaces the class implements
+                        Arrays.stream(clazz.getInterfaces())
+                ).flatMap(BaseThingFactory::walk));
     }
 }

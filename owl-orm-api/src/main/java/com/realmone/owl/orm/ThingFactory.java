@@ -15,7 +15,7 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import java.util.Optional;
 
 /**
- * This interface describes the front door to workign with the OWL ORM API. To create instances of your types
+ * This interface describes the front door to working with the OWL ORM API. To create instances of your types
  * of {@link Thing}s, simple use a {@link ThingFactory} implementation to get/create them.
  */
 public interface ThingFactory {
