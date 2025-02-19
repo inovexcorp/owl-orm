@@ -19,6 +19,7 @@
         <module>owl-orm-types</module>
         <module>owl-orm-maven-plugin</module>
         <module>owl-orm-generate</module>
+        <module>owl-orm-osgi</module>
     </modules>
 
     <properties>

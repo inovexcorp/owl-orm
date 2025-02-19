@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.realmone</groupId>
@@ -7,9 +9,9 @@
         <version>0.0.9-SNAPSHOT</version>
     </parent>
 
-    <artifactId>owl-orm-engine</artifactId>
-    <name>OWL ORM Engine</name>
-    <description>The logic engine that implements the OWL ORM API</description>
+    <artifactId>owl-orm-osgi</artifactId>
+    <name>OWL ORM OSGi</name>
+    <description>A collection of OSGi services to make working with OWL ORM easier.</description>
     <url>https://realmone.com/foundry</url>
     <packaging>bundle</packaging>
 
@@ -21,14 +23,28 @@
         </dependency>
         <dependency>
             <groupId>com.realmone</groupId>
+            <artifactId>owl-orm-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.realmone</groupId>
             <artifactId>owl-orm-types</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
-            <scope>provided</scope>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.cm</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <version>8.0.0</version>
         </dependency>
         <!-- TODO: Figure out if we can avoid this -->
         <dependency>
@@ -36,21 +52,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.36</version>
         </dependency>
-
-        <!-- Test Dependencies -->
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-api</artifactId>
-            <version>4.3.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-turtle</artifactId>
-            <version>4.3.9</version>
-        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -62,12 +64,10 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>OWL ORM Engine</Bundle-Name>
+                        <Bundle-Name>OWL ORM OSGi</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.realmone.owl.orm,
-                            com.realmone.owl.orm.types,
-                            com.realmone.owl.orm.basic
+                            com.realmone.owl.orm.osgi
                         </Export-Package>
                         <build>${maven.build.timestamp}</build>
                         <_snapshot>${maven.build.timestamp}</_snapshot>
