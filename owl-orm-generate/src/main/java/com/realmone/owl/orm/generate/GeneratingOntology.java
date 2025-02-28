@@ -108,7 +108,8 @@ public class GeneratingOntology extends AbstractOntology {
         classIris.forEach(classResource -> {
             classIndex.put(classResource, generateInterface(classResource));
             // Add our class to the hierarchy
-            classHierarchy.put(classResource, GraphUtils.lookupParentClasses(closureModel, classResource));
+            classHierarchy.put(classResource, GraphUtils.lookupParentClasses(closureModel, classResource,
+                    enforceFullClosure));
         });
         // Define the class hierarchy
         classHierarchy.forEach((classResource, parents) -> {

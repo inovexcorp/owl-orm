@@ -38,7 +38,7 @@ public class ReferenceOntology extends AbstractOntology {
     protected ReferenceOntology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
                                 @NonNull String packageName, @NonNull String ontologyName,
                                 @NonNull SourceGenerator sourceGenerator) throws OrmException {
-        super(sourceGenerator, codeModel);
+        super(sourceGenerator, codeModel, false);
         final Set<Resource> ontologiesInModel = ontologyModel.filter(null, RDF.TYPE, OWL.ONTOLOGY).subjects();
         if (ontologiesInModel.size() > 1) {
             throw new OrmException("Ontology data contains multiple ontology definitions");
