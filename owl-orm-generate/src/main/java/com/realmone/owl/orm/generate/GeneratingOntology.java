@@ -18,6 +18,7 @@ import com.sun.codemodel.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -29,11 +30,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+@Slf4j
 @Getter
 public class GeneratingOntology extends AbstractOntology {
 
@@ -55,7 +54,8 @@ public class GeneratingOntology extends AbstractOntology {
                               @NonNull Model referenceModel, @NonNull String ontologyName,
                               @NonNull String ontologyPackage, @NonNull SourceGenerator sourceGenerator,
                               boolean enforceFullClosure) throws OrmException {
-        super(sourceGenerator, codeModel);
+        super(sourceGenerator, codeModel, enforceFullClosure);
+
         this.jPackage = codeModel._package(ontologyPackage);
         this.model = ontologyModel;
         this.ontologyName = ontologyName;
@@ -115,11 +115,20 @@ public class GeneratingOntology extends AbstractOntology {
             try {
                 JDefinedClass clazz = (JDefinedClass) classIndex.get(classResource);
                 parents.forEach(parentResource -> {
-                    JClass ref = findClassReference(parentResource)
-                            //TODO - better error message
-                            .orElseThrow(() -> new OrmGenerationException("Couldn't find parent class in index: " +
-                                    parentResource));
-                    clazz._implements(ref);
+                    Optional<JClass> optionalParent = findClassReference(parentResource);
+                    // If the parent class is present in the closure
+                    if (optionalParent.isPresent()) {
+                        clazz._implements(optionalParent.get());
+                    }
+                    // Else if we're configured to enforce the full closure we should throw an exception
+                    else if (enforceFullClosure) {
+                        throw new OrmGenerationException("Couldn't find parent class in index: " + parentResource);
+                    }
+                    // Else we should log a warning to the user, and trust they know what they're doing :)
+                    else {
+                        log.warn("Couldn't find parent class of '{}' in closure: {}", classResource.stringValue(),
+                                parentResource.stringValue());
+                    }
                 });
             } catch (ClassCastException e) {
                 //TODO - better error handling...
