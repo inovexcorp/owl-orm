@@ -14,7 +14,13 @@ import com.realmone.owl.orm.generate.properties.DatatypeProperty;
 import com.realmone.owl.orm.generate.properties.ObjectProperty;
 import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.realmone.owl.orm.generate.support.NamingUtilities;
-import com.sun.codemodel.*;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JPackage;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -30,7 +36,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Getter
