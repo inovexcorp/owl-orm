@@ -14,6 +14,8 @@ import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
 import lombok.*;
 import org.eclipse.rdf4j.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -31,6 +33,7 @@ import java.util.stream.Stream;
 @Builder
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseThingFactory implements ThingFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseThingFactory.class);
 
     @NonNull
     private final ValueConverterRegistry valueConverterRegistry;
@@ -42,6 +45,8 @@ public class BaseThingFactory implements ThingFactory {
     @NonNull
     @Getter
     private final ValueFactory valueFactory;
+
+    private final ClassLoader[] classLoaders;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -65,8 +70,7 @@ public class BaseThingFactory implements ThingFactory {
                         .useCreate(true)
                         .build())
                 .build();
-        return (T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
-                new Class[]{type}, handler);
+        return createInstance(handler, type);
     }
 
     @Override
@@ -85,7 +89,6 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         IRI typeIri = valueFactory.createIRI(annotation.value());
@@ -105,8 +108,7 @@ public class BaseThingFactory implements ThingFactory {
                     .useModel(model)
                     .useDelegate(delegate)
                     .build();
-            return Optional.of((T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
-                    new Class[]{type}, handler));
+            return Optional.of(createInstance(handler, type));
         }
     }
 
@@ -160,5 +162,32 @@ public class BaseThingFactory implements ThingFactory {
                         // and all the interfaces the class implements
                         Arrays.stream(clazz.getInterfaces())
                 ).flatMap(BaseThingFactory::walk));
+    }
+
+    /**
+     * Attempts to create an instance of the provided class using the provided {@link OwlOrmInvocationHandler}. Tries
+     * the provided ClassLoaders if present and falls back on the loader for the handler.
+     *
+     * @param handler The specific {@link OwlOrmInvocationHandler} to use when creating the instance
+     * @param type The type of Thing to create
+     * @return The Thing instance created
+     * @param <T> A type of Thing
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends Thing> T createInstance(OwlOrmInvocationHandler handler, Class<T> type) {
+        if (classLoaders != null) {
+            LOGGER.trace("Trying to create an instance of {} using provided class loaders", type);
+            for (ClassLoader classLoader: classLoaders) {
+                try {
+                    LOGGER.trace("Trying class loader {}", classLoader.getName());
+                    return (T) Proxy.newProxyInstance(classLoader, new Class[]{type}, handler);
+                } catch (IllegalArgumentException ex) {
+                    LOGGER.trace("Could not create instance with class loader {}", classLoader.getName());
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return (T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
+                new Class[]{type}, handler);
     }
 }

@@ -4,6 +4,7 @@ import com.realmone.owl.orm.Thing;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ public class ORMActivator {
     List<Class<? extends Thing>> ormClasses = new ArrayList<>();
 
     @Reference
-    protected ThingFactoryProvider thingFactoryProvider;
+    protected OsgiThingFactory thingFactoryProvider;
 
     protected void start(BundleContext bundleContext) throws Exception {
         LOG.debug("Starting ORM Activator");
@@ -45,6 +46,8 @@ public class ORMActivator {
         } else {
             LOG.debug("No ORM-Classes Manifest header found");
         }
+
+        thingFactoryProvider.addClassLoader(bundleContext.getBundle().adapt(BundleWiring.class).getClassLoader());
     }
 
     protected void stop(BundleContext bundleContext) throws Exception {
@@ -53,5 +56,6 @@ public class ORMActivator {
                 thingFactoryProvider.getTypeAnnotation(ormClass).ifPresent(type ->
                         thingFactoryProvider.removeClass(vf.createIRI(type.value()))));
         ormClasses.clear();
+        thingFactoryProvider.removeClassLoader(bundleContext.getBundle().adapt(BundleWiring.class).getClassLoader());
     }
 }

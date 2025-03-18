@@ -1,5 +1,6 @@
 package com.realmone.owl.orm.osgi;
 
+import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
 import com.realmone.owl.orm.ThingFactory;
 import com.realmone.owl.orm.annotations.Type;
@@ -21,7 +22,9 @@ import com.realmone.owl.orm.types.impl.StringValueConverter;
 import com.realmone.owl.orm.types.ValueConverter;
 import com.realmone.owl.orm.types.impl.ValueValueConverter;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ModelFactory;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
@@ -39,10 +42,10 @@ import java.util.Set;
 
 @Component(
         immediate = true,
-        service = ThingFactoryProvider.class
+        service = OsgiThingFactory.class
 )
-public class ThingFactoryProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(ThingFactoryProvider.class);
+public class OsgiThingFactory implements ThingFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(OsgiThingFactory.class);
     private static final DefaultValueConverterRegistry valueConverterRegistry = new DefaultValueConverterRegistry();
     private static final ModelFactory mf = new DynamicModelFactory();
     private static final ValueFactory vf = new ValidatingValueFactory();
@@ -65,6 +68,8 @@ public class ThingFactoryProvider {
     );
 
     Map<IRI, Class<? extends Thing>> index = new HashMap<>();
+
+    Map<String, ClassLoader> classLoaderMap = new HashMap<>();
 
     // Approach #1
 //    Map<Class<? extends Thing>, Set<Class<? extends Class<? extends Thing>>>> parentChildMap = new HashMap<>();
@@ -89,6 +94,15 @@ public class ThingFactoryProvider {
 //        this.hierarchy = new ClassHierarchy<>();
     }
 
+    public void addClassLoader(ClassLoader classLoader) {
+        LOG.debug("Adding ClassLoader {}", classLoader.getName());
+        classLoaderMap.putIfAbsent(classLoader.getName(), classLoader);
+    }
+
+    public void removeClassLoader(ClassLoader classLoader) {
+        LOG.debug("Removing ClassLoader {}", classLoader.getName());
+        classLoaderMap.remove(classLoader.getName());
+    }
 
     public void addClass(IRI classIRI, Class<? extends Thing> clazz) {
         LOG.debug("Registering ORM class {} with IRI {}", clazz.getCanonicalName(), classIRI);
@@ -142,17 +156,58 @@ public class ThingFactoryProvider {
 //        return (Set<Class<? extends T>>) (Set<?>) this.parentChildMap.getOrDefault(clazz, new HashSet<>());
 //    }
 
-    public ThingFactory getThingFactory() {
+    public <T extends Thing> Optional<Type> getTypeAnnotation(Class<T> type) {
+        Type typeAnn = type.getDeclaredAnnotation(Type.class);
+        return Optional.ofNullable(typeAnn);
+    }
+
+    @Override
+    public <T extends Thing> T create(Class<T> type, Resource resource) throws OrmException {
+        return getThingFactory().create(type, resource);
+    }
+
+    @Override
+    public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
+        return getThingFactory().create(type, resource, model);
+    }
+
+    @Override
+    public <T extends Thing> T create(Class<T> type, String resource, Model model) throws OrmException {
+        return getThingFactory().create(type, resource, model);
+    }
+
+    @Override
+    public <T extends Thing> T create(Class<T> type, String resource) throws OrmException {
+        return getThingFactory().create(type, resource);
+    }
+
+    @Override
+    public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
+        return getThingFactory().get(type, resource, model);
+    }
+
+    @Override
+    public <T extends Thing> Optional<T> get(Class<T> type, String resource, Model model) throws OrmException {
+        return getThingFactory().get(type, resource, model);
+    }
+
+    @Override
+    public ValueFactory getValueFactory() {
+        return vf;
+    }
+
+    @Override
+    public ModelFactory getModelFactory() {
+        return mf;
+    }
+
+    private ThingFactory getThingFactory() {
         return BaseThingFactory.builder()
                 .valueFactory(vf)
                 .modelFactory(mf)
                 .valueConverterRegistry(valueConverterRegistry)
+                .classLoaders(classLoaderMap.values().toArray(new ClassLoader[0]))
                 .build();
-    }
-
-    public <T extends Thing> Optional<Type> getTypeAnnotation(Class<T> type) {
-        Type typeAnn = type.getDeclaredAnnotation(Type.class);
-        return Optional.ofNullable(typeAnn);
     }
 
     // Approach #4
