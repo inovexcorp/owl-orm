@@ -31,7 +31,7 @@
         <rdf4j.version>4.3.9</rdf4j.version>
         <lombok.version>1.18.28</lombok.version>
         <junit.version>4.13.2</junit.version>
-        <slf4j.version>2.0.11</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
     <dependencies>
@@ -78,6 +78,15 @@
     </distributionManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>5.1.9</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <!-- Plugin for source generation -->
             <plugin>

@@ -34,7 +34,7 @@ public class ObjectProperty extends Property {
 
     @Override
     public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
-
+        // Intentionally left empty for this implementation of Property
     }
 
     private static JClass identifyRange(ClosureIndex closureIndex, Resource rangeIri, JCodeModel codeModel)
