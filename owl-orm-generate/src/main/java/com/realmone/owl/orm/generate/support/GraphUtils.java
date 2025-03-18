@@ -10,6 +10,7 @@ package com.realmone.owl.orm.generate.support;
 import com.google.common.xml.XmlEscapers;
 import com.realmone.owl.orm.generate.OrmGenerationException;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @UtilityClass
 public class GraphUtils {
 
@@ -59,16 +61,21 @@ public class GraphUtils {
         }
     }
 
-    public static Set<Resource> lookupParentClasses(Model model, Resource classResource) throws OrmGenerationException {
+    public static Set<Resource> lookupParentClasses(Model model, Resource classResource, boolean enforceFullClosure)
+            throws OrmGenerationException {
         try {
             return model.filter(classResource, RDFS.SUBCLASSOF, null)
                     // Find the subClassOf properties
                     .objects().stream().map(Resource.class::cast)
                     .filter(parentResource -> {
                         if (model.filter(parentResource, null, null).isEmpty()) {
-                            //TODO improve error message to include ontology, child class, and missing parent.
-                            throw new OrmGenerationException("No ontology data about parent resource in model for " +
-                                    classResource.stringValue() + ": " + parentResource.stringValue());
+                            String message = String.format("Searching for a parent of class %s, and couldn't find the parent class of %s",
+                                    classResource.stringValue(), parentResource.stringValue());
+                            if (enforceFullClosure) {
+                                throw new OrmGenerationException(message);
+                            } else {
+                                log.warn(message);
+                            }
                         }
                         return !model.filter(parentResource, RDF.TYPE, OWL.CLASS).isEmpty();
                     })
