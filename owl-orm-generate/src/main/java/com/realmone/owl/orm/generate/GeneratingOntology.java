@@ -125,6 +125,9 @@ public class GeneratingOntology extends AbstractOntology {
         classHierarchy.forEach((classResource, parents) -> {
             try {
                 JDefinedClass clazz = (JDefinedClass) classIndex.get(classResource);
+                // Add the type IRI/resource to the class as a static field
+                clazz.field(JMod.STATIC, String.class, "TYPE", JExpr.lit(classResource.stringValue()))
+                        .javadoc().add("The String value of the rdf:type IRI that identifies this class.");
                 parents.forEach(parentResource -> {
                     Optional<JClass> optionalParent = findClassReference(parentResource);
                     // If the parent class is present in the closure
