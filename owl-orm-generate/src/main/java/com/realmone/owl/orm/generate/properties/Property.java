@@ -7,6 +7,7 @@
  */
 package com.realmone.owl.orm.generate.properties;
 
+import com.realmone.owl.orm.VocabularyIRIs;
 import com.realmone.owl.orm.generate.ClosureIndex;
 import com.realmone.owl.orm.generate.OrmGenerationException;
 import com.sun.codemodel.*;
@@ -14,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +42,27 @@ public abstract class Property {
     protected abstract void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException;
 
     public void attach(JDefinedClass jDefinedClass) throws OrmGenerationException {
+        // Add IRI field
+        if (resource.isIRI()) {
+            IRI propIRI = (IRI) resource;
+            String staticFieldName = javaName.toUpperCase();
+            if (jDefinedClass.fields().containsKey(staticFieldName)) {
+                staticFieldName += "1";
+            }
+            jDefinedClass.field(JMod.STATIC, IRI.class, staticFieldName, jCodeModel.ref(VocabularyIRIs.class).staticInvoke("createIRI")
+                            .arg(propIRI.getNamespace())
+                            .arg(propIRI.getLocalName()))
+                    .javadoc().add("The IRI value of the " + resource + " property");
+        }
         // Build methods...
         createGetter(jDefinedClass);
         createSetter(jDefinedClass);
+        createClearOutMethod(jDefinedClass);
         // addTo, removeFrom, clearOut on non-functional fields
         if (!functional) {
             createAddRemoveMethod(jDefinedClass, true);
             createAddRemoveMethod(jDefinedClass, false);
-            createClearOutMethod(jDefinedClass);
+//            createClearOutMethod(jDefinedClass);
         }
         additionalAttach(jDefinedClass);
     }
@@ -98,8 +113,8 @@ public abstract class Property {
         docs.add(commentContext);
         docs.addParam(parameter).add(add ? "The value to add to the property to for this instance"
                 : "The value to remove from the property to for this instance");
-        docs.addReturn().add(add ? "Whether or not the new value was added to the set of data"
-                : "Whether or not the value was removed from the set of data");
+        docs.addReturn().add(add ? "Whether the new value was added to the set of data"
+                : "Whether the value was removed from the set of data");
     }
 
     public void createClearOutMethod(JDefinedClass jDefinedClass) {
@@ -109,7 +124,7 @@ public abstract class Property {
         docs.add(String.format("<p>Clear out all values associated with property <b>%s</b>.</p><br>",
                 resource.stringValue()));
         docs.add(commentContext);
-        docs.addReturn().add("Whether or not elements were cleared out");
+        docs.addReturn().add("Whether elements were cleared out");
     }
 
     private void annotateMethod(JMethod method, JExpression rangeClass) {
