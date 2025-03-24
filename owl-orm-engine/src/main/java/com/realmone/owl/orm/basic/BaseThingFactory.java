@@ -53,7 +53,9 @@ public class BaseThingFactory implements ThingFactory {
     public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         Set<IRI> parents = getAllExtendedOrImplementedTypesRecursively(type).stream()
-                .map(parentClazz -> getTypeAnnotation((Class<? extends Thing>) parentClazz))
+                .map(parentClazz -> optTypeAnnotation((Class<? extends Thing>) parentClazz))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(parentType -> valueFactory.createIRI(parentType.value()))
                 .collect(Collectors.toSet());
         IRI typeIri = valueFactory.createIRI(annotation.value());
@@ -125,11 +127,12 @@ public class BaseThingFactory implements ThingFactory {
      * @return The {@link Type} annotation on that {@link Class} or an {@link IllegalStateException}
      */
     private static <T extends Thing> Type getTypeAnnotation(Class<T> type) {
-        Type typeAnn = type.getDeclaredAnnotation(Type.class);
-        if (typeAnn == null) {
-            throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
-        }
-        return typeAnn;
+        return optTypeAnnotation(type).orElseThrow(() ->
+                new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName()));
+    }
+
+    private static <T extends Thing> Optional<Type> optTypeAnnotation(Class<T> type) {
+        return Optional.ofNullable(type.getDeclaredAnnotation(Type.class));
     }
 
     /**
@@ -178,11 +181,12 @@ public class BaseThingFactory implements ThingFactory {
         if (classLoaders != null) {
             LOGGER.trace("Trying to create an instance of {} using provided class loaders", type);
             for (ClassLoader classLoader: classLoaders) {
+                String id = String.valueOf(System.identityHashCode(classLoader));
                 try {
-                    LOGGER.trace("Trying class loader {}", classLoader.getName());
+                    LOGGER.trace("Trying class loader {}", id);
                     return (T) Proxy.newProxyInstance(classLoader, new Class[]{type}, handler);
                 } catch (IllegalArgumentException ex) {
-                    LOGGER.trace("Could not create instance with class loader {}", classLoader.getName());
+                    LOGGER.trace("Could not create instance with class loader {}", id);
                     ex.printStackTrace();
                 }
             }

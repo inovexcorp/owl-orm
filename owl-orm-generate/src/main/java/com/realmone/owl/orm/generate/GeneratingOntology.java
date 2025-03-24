@@ -9,6 +9,7 @@ package com.realmone.owl.orm.generate;
 
 import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
+import com.realmone.owl.orm.VocabularyIRIs;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.generate.properties.DatatypeProperty;
 import com.realmone.owl.orm.generate.properties.ObjectProperty;
@@ -26,6 +27,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
@@ -34,13 +36,13 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.processing.Generated;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.processing.Generated;
 
 @Slf4j
 @Getter
@@ -125,6 +127,15 @@ public class GeneratingOntology extends AbstractOntology {
         classHierarchy.forEach((classResource, parents) -> {
             try {
                 JDefinedClass clazz = (JDefinedClass) classIndex.get(classResource);
+                // Add the type IRI/resource to the class as a static field
+                if (classResource.isIRI()) {
+                    IRI classIRI = (IRI) classResource;
+                    clazz.field(JMod.STATIC, IRI.class, "TYPE", jPackage.owner().ref(VocabularyIRIs.class)
+                                    .staticInvoke("createIRI")
+                                    .arg(classIRI.getNamespace())
+                                    .arg(classIRI.getLocalName()))
+                            .javadoc().add("The IRI value of the rdf:type that identifies this class.");
+                }
                 parents.forEach(parentResource -> {
                     Optional<JClass> optionalParent = findClassReference(parentResource);
                     // If the parent class is present in the closure

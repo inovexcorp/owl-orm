@@ -25,20 +25,32 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ModelFactory;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component(
         immediate = true,
@@ -71,18 +83,10 @@ public class OsgiThingFactory implements ThingFactory {
 
     Map<String, ClassLoader> classLoaderMap = new HashMap<>();
 
-    // Approach #1
-//    Map<Class<? extends Thing>, Set<Class<? extends Class<? extends Thing>>>> parentChildMap = new HashMap<>();
-    // Approach #2
-//    Map<Class<? super Class<? extends Thing>>, Set<Class<? extends Thing>>> parentChildMap = new HashMap<>();
-    // Approach #3
-//    ClassHierarchy<Thing> hierarchy;
-
-    // Approach #4
-//    Set<Parent<? extends Thing>> parents = new HashSet<>();
+    Map<Class<? extends Thing>, Set<Class<? extends Thing>>> parentChildMap = new HashMap<>();
 
     @Activate
-    protected void start() {
+    public void start() {
         LOG.debug("Registering ValueConverters in ValueConverterRegistry");
         converters.forEach(converter -> {
             if (valueConverterRegistry.getValueConverter(converter.getType()).isEmpty()) {
@@ -90,51 +94,44 @@ public class OsgiThingFactory implements ThingFactory {
                 valueConverterRegistry.register(converter);
             }
         });
-        // Approach #3
-//        this.hierarchy = new ClassHierarchy<>();
     }
 
     public void addClassLoader(ClassLoader classLoader) {
-        LOG.debug("Adding ClassLoader {}", classLoader.getName());
-        classLoaderMap.putIfAbsent(classLoader.getName(), classLoader);
+        String id = String.valueOf(System.identityHashCode(classLoader));
+        LOG.debug("Adding ClassLoader {}", id);
+        classLoaderMap.putIfAbsent(id, classLoader);
     }
 
     public void removeClassLoader(ClassLoader classLoader) {
-        LOG.debug("Removing ClassLoader {}", classLoader.getName());
-        classLoaderMap.remove(classLoader.getName());
+        String id = String.valueOf(System.identityHashCode(classLoader));
+        LOG.debug("Removing ClassLoader {}", id);
+        classLoaderMap.remove(id);
     }
 
     public void addClass(IRI classIRI, Class<? extends Thing> clazz) {
         LOG.debug("Registering ORM class {} with IRI {}", clazz.getCanonicalName(), classIRI);
         this.index.putIfAbsent(classIRI, clazz);
         LOG.debug("Updating parent map");
-        // Approach #3
-//        hierarchy.populateClassHierarchy(clazz);
-        // Approach #4
-//        populateParents(clazz);
-        // Approach #1 and 2
-//        getParents(clazz).forEach(parent -> {
-//            LOG.trace("Identified parent {}", parent);
-//            parentChildMap.computeIfAbsent(parent, k -> new HashSet<>()).add(clazz);
-//        });
+        getParents(clazz).forEach(parent -> {
+            LOG.trace("Identified parent {}", parent);
+            parentChildMap.computeIfAbsent(parent, k -> new HashSet<>()).add(clazz);
+        });
     }
 
     public void removeClass(IRI classIRI) {
         LOG.debug("Unregistering ORM class IRI {}", classIRI);
         if (this.index.containsKey(classIRI)) {
-            // Approach #1 and 2
-//            Class<? extends Thing> clazz = this.index.get(classIRI);
-//            getParents(this.index.get(classIRI)).forEach(parent -> {
-//                if (parentChildMap.containsKey(parent) && parentChildMap.get(parent).contains(clazz)) {
-//                    LOG.trace("Removing {} as child of {}", clazz, parent);
-//                    parentChildMap.get(parent).remove(clazz);
-//                    if (parentChildMap.get(parent).isEmpty()) {
-//                        LOG.trace("Removing parent from map");
-//                        parentChildMap.remove(parent);
-//                    }
-//                }
-//            });
-            // Didn't get to this with the other approachs...
+            Class<? extends Thing> clazz = this.index.get(classIRI);
+            getParents(this.index.get(classIRI)).forEach(parent -> {
+                if (parentChildMap.containsKey(parent) && parentChildMap.get(parent).contains(clazz)) {
+                    LOG.trace("Removing {} as child of {}", clazz, parent);
+                    parentChildMap.get(parent).remove(clazz);
+                    if (parentChildMap.get(parent).isEmpty()) {
+                        LOG.trace("Removing parent from map");
+                        parentChildMap.remove(parent);
+                    }
+                }
+            });
 
             this.index.remove(classIRI);
         }
@@ -144,21 +141,55 @@ public class OsgiThingFactory implements ThingFactory {
         return this.index.get(classIRI);
     }
 
-    public <T extends Thing> Set<? extends T> getChildren(Class<T> clazz) {
-        return new HashSet<>();
-        // Approach #3
-//        return hierarchy.getSubclasses(clazz);
+    public IRI getIRI(Class<? extends Thing> clazz) {
+        return vf.createIRI(getTypeAnnotation(clazz).orElseThrow(() -> new IllegalStateException("Subclass of Thing must have a "
+                + "Type annotation")).value());
     }
 
-    // Approach #1 and #2
-//    @SuppressWarnings("unchecked")
-//    public <T extends Thing> Set<Class<? extends T>> getChildren(Class<T> clazz) {
-//        return (Set<Class<? extends T>>) (Set<?>) this.parentChildMap.getOrDefault(clazz, new HashSet<>());
-//    }
+    public <T extends Thing> List<Class<? extends T>> getChildren(Class<T> clazz) {
+        if (parentChildMap.get(clazz) == null) {
+            return Collections.emptyList();
+        }
+        return parentChildMap.get(clazz).stream()
+                .filter(childClazz -> childClazz.isAssignableFrom(clazz))
+                .map(childClazz -> (Class<? extends T>) childClazz)
+                .sorted((clazz1, clazz2) -> getParents(clazz2).size() - getParents(clazz1).size())
+                .collect(Collectors.toList());
+    }
+
+    public <T extends Thing> Optional<Class<? extends T>> getSpecificType(T thing) {
+        List<IRI> types = convertIteratorToStream(thing.getModel().getStatements(null, RDF.TYPE, null).iterator())
+                .map(Statement::getObject)
+                .filter(Value::isIRI)
+                .map(value -> (IRI) value)
+                .toList();
+        Set<Class<? extends Thing>> parents = new HashSet<>();
+
+        return types.stream()
+                .map(this::getClass)
+                .filter(Objects::nonNull)
+                .peek(clazz -> parents.addAll(getParents(clazz)))
+                .filter(clazz -> !parents.contains(clazz))
+                .filter(clazz -> clazz.isAssignableFrom(thing.getClass()))
+                .min((clazz1, clazz2) -> getParents(clazz2).size() - getParents(clazz1).size())
+                .map(clazz -> (Class<? extends T>) clazz);
+    }
 
     public <T extends Thing> Optional<Type> getTypeAnnotation(Class<T> type) {
         Type typeAnn = type.getDeclaredAnnotation(Type.class);
         return Optional.ofNullable(typeAnn);
+    }
+
+    public <T extends Thing> Set<T> getAll(Class<T> type, Model model) {
+        Type annotation = getTypeAnnotation(type).orElseThrow(() ->
+                new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName()));
+        IRI typeIri = vf.createIRI(annotation.value());
+        return model.filter(null, RDF.TYPE, typeIri).stream()
+                .map(Statement::getSubject)
+                .map(iri -> get(type, iri, model))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -210,97 +241,18 @@ public class OsgiThingFactory implements ThingFactory {
                 .build();
     }
 
-    // Approach #4
-//    private <T extends Thing> void populateParents(Class<T> clazz) {
-//        if (clazz != Thing.class) {
-//            Class<? super T> parentClass = clazz.getSuperclass();
-//            if (parentClass != null && parentClass != Thing.class && Thing.class.isAssignableFrom(parentClass)) {
-//                Optional<Parent<? extends Thing>> optParent = parents.stream().filter(parent -> parent.getType() == parentClass).findFirst();
-//                if (optParent.isPresent()) {
-//                    optParent.get().children.add(clazz);
-//                } else {
-//                    Parent<? extends Parent> newParent = new Parent(parentClass);
-//                    newParent.children.add(clazz);
-//                    parents.add(newParent);
-//                }
-//            }
-//        }
-//    }
+    private <T extends Thing> Set<Class<? extends Thing>> getParents(Class<T> clazz) {
+        if (clazz == Thing.class) {
+            return Collections.emptySet();
+        }
+        return Arrays.stream(clazz.getInterfaces())
+                .filter(parent -> parent != null && parent != Thing.class && Thing.class.isAssignableFrom(parent))
+                .map(parent -> (Class<? extends Thing>) parent)
+                .collect(Collectors.toSet());
+    }
 
-    // Approach #1
-//    private <T extends Thing> Set<Class<? extends Thing>> getParents(Class<T> clazz) {
-//        if (clazz == Thing.class) {
-//            return Collections.emptySet();
-//        }
-//        Set<Class<? extends Thing>> parents = new HashSet<>();
-//        Class<? super T> parent = clazz.getSuperclass();
-//        while (parent != null && parent != Thing.class && Thing.class.isAssignableFrom(parent)) {
-//            parents.add((Class<? extends Thing>) parent);
-//            parent = parent.getSuperclass();
-//        }
-//        return parents;
-//    }
-
-    // Approach #2
-//    private <T extends Thing> Set<Class<? super T>> getParents(Class<T> clazz) {
-//        if (clazz == Thing.class) {
-//            return Collections.emptySet();
-//        }
-//        Set<Class<? super T>> parents = new HashSet<>();
-//        Class<? super T> parent = clazz.getSuperclass();
-//        while (parent != null && parent != Thing.class && Thing.class.isAssignableFrom(parent)) {
-//            parents.add(parent);
-//            parent = parent.getSuperclass();
-//        }
-//        return parents;
-//    }
-
-    // Another option for Approach #1 instead of getParents
-//    private <T extends Thing> void populateClassHierarchy(Class<T> clazz) {
-//        Class<? super T> superClass = clazz.getSuperclass();
-//        if (superClass != null && superClass != Thing.class && Thing.class.isAssignableFrom(superClass)) {
-//            Class<? extends Thing> parent = (Class<? extends Thing>) superClass;
-//            addClass(parent, clazz);
-//            populateClassHierarchy(parent);
-//        }
-//    }
-//    private <T extends Thing> void addClass(Class<T> parentClass, Class<? extends T> subClass) {
-//        parentChildMap.computeIfAbsent(parentClass, k -> new HashSet<>()).add(subClass);
-//    }
-
-    // Approach #3
-//    private class ClassHierarchy<T extends Thing> {
-//        private Map<Class<? extends T>, Set<Class<? extends T>>> parentChildMap = new HashMap<>();
-//
-//        public void addClass(Class<? extends T> parentClass, Class<? extends T> subClass) {
-//            parentChildMap.computeIfAbsent(parentClass, k -> new HashSet<>()).add(subClass);
-//        }
-//
-//        public Set<Class<? extends T>> getSubclasses(Class<? extends T> parentClass) {
-//            return parentChildMap.getOrDefault(parentClass, new HashSet<>());
-//        }
-//
-//        public void populateClassHierarchy(Class<? extends T> clazz) {
-//            Class<? extends T> superClass = (Class<? extends T>) clazz.getSuperclass();
-//            if (superClass != null && Thing.class.isAssignableFrom(superClass)) {
-//                addClass(superClass, clazz);
-//                populateClassHierarchy(superClass);
-//            }
-//        }
-//    }
-
-    // Approach #4
-//    private class Parent<T extends Thing> {
-//        public Set<Class<? extends T>> children = new HashSet<>();
-//
-//        Class<T> type;
-//
-//        Parent(Class<T> clazz) {
-//            this.type = clazz;
-//        }
-//
-//        Class<T> getType() {
-//            return type;
-//        }
-//    }
+    private <T> Stream<T> convertIteratorToStream(Iterator<T> iterator) {
+        Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED);
+        return StreamSupport.stream(spliterator, false);
+    }
 }
