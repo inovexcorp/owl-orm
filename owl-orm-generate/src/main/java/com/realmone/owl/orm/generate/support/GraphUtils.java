@@ -64,6 +64,7 @@ public class GraphUtils {
             return model.filter(classResource, RDFS.SUBCLASSOF, null)
                     // Find the subClassOf properties
                     .objects().stream().map(Resource.class::cast)
+                    .filter(Resource::isIRI) // Ignore blank nodes (usually restrictions)
                     .filter(parentResource -> {
                         if (model.filter(parentResource, null, null).isEmpty()) {
                             //TODO improve error message to include ontology, child class, and missing parent.

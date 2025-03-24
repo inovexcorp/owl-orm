@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 public class GeneratingOntology extends AbstractOntology {
@@ -112,7 +113,11 @@ public class GeneratingOntology extends AbstractOntology {
                 .map(this::toResource).forEach(imports::add);
         // Add all class resources to our index.
         // TODO - RDFS.CLASS support?
-        classIris.addAll(model.filter(null, RDF.TYPE, OWL.CLASS).subjects());
+        classIris.addAll(model.filter(null, RDF.TYPE, OWL.CLASS).subjects()
+                .stream()
+                .filter(Resource::isIRI) // Don't create interfaces for blank node classes (usually Restrictions)
+                .collect(Collectors.toSet())
+        );
         // Build our hierarchy index map.
         classIris.forEach(classResource -> {
             classIndex.put(classResource, generateInterface(classResource));

@@ -59,7 +59,7 @@ ontologies.each { ontology ->
     assert thingFile.exists() : "Expected Thing superclass file does not exist: ${thingFile.absolutePath}"
 
     // Extract OWL classes and their dc:title values
-    def classes = rdfModel.filter(null, RDF.TYPE, OWL.CLASS).subjects().collect { subject ->
+    def classes = rdfModel.filter(null, RDF.TYPE, OWL.CLASS).subjects().findAll { subject -> subject.isIRI() }.collect { subject ->
         def title = rdfModel.filter(subject, DCTERMS.TITLE, null).objects().find()?.stringValue()
         def label = rdfModel.filter(subject, RDFS.LABEL, null).objects().find()?.stringValue()
         if (title) {
