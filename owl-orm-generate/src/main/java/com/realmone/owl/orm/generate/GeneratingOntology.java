@@ -129,6 +129,8 @@ public class GeneratingOntology extends AbstractOntology {
             try {
                 JDefinedClass clazz = (JDefinedClass) classIndex.get(classResource);
                 // Add the type IRI/resource to the class as a static field
+                clazz.field(JMod.STATIC, String.class, "TYPE_STR", JExpr.lit(classResource.stringValue()))
+                        .javadoc().add("The String value of the rdf:type that identifies this class.");
                 if (classResource.isIRI()) {
                     IRI classIRI = (IRI) classResource;
                     clazz.field(JMod.STATIC, IRI.class, "TYPE", jPackage.owner().ref(VocabularyIRIs.class)
