@@ -40,8 +40,7 @@ public class DatatypeProperty extends Property {
 
     @Override
     public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
-
-
+        // Intentionally left empty for this implementation of Property.
     }
 
     private static JClass identifyRange(JCodeModel codeModel, Resource rangeIri) {

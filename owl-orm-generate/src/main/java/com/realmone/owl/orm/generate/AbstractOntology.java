@@ -31,10 +31,12 @@ public abstract class AbstractOntology implements ClosureIndex {
     protected final Model closureModel = MODEL_FACTORY.createEmptyModel();
     protected final SourceGenerator sourceGenerator;
     protected final JCodeModel codeModel;
+    protected final boolean enforceFullClosure;
 
-    public AbstractOntology(SourceGenerator sourceGenerator, JCodeModel codeModel) {
+    protected AbstractOntology(SourceGenerator sourceGenerator, JCodeModel codeModel, boolean enforceFullClosure) {
         this.sourceGenerator = sourceGenerator;
         this.codeModel = codeModel;
+        this.enforceFullClosure = enforceFullClosure;
     }
 
     @Override

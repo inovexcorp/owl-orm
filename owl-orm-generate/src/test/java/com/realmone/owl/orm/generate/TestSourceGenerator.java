@@ -68,6 +68,38 @@ public class TestSourceGenerator {
                 .build();
     }
 
+    @Test(expected = OrmGenerationException.class)
+    public void testMissingParentClass() {
+        SourceGenerator.builder()
+                .enforceFullClosure(true)
+                .outputLocation("target/")
+                .generateForOntologies(Set.of(
+                        OntologyMeta.builder()
+                                .ontologyName("BierOnto")
+                                .packageName("com.realmone.bieronto")
+                                .file(new File("src/test/resources/BierOntoWithoutImport.ttl")
+                                        .getAbsolutePath())
+                                .build()))
+                .referenceOntologies(Collections.emptySet())
+                .build();
+    }
+
+    @Test
+    public void testMissingParentClassAllowed() {
+        SourceGenerator.builder()
+                .enforceFullClosure(false)
+                .outputLocation("target/source-gen-test-allowed-missing")
+                .generateForOntologies(Set.of(
+                        OntologyMeta.builder()
+                                .ontologyName("BierOnto")
+                                .packageName("com.realmone.bieronto")
+                                .file(new File("src/test/resources/BierOntoWithoutImport.ttl")
+                                        .getAbsolutePath())
+                                .build()))
+                .referenceOntologies(Collections.emptySet())
+                .build();
+    }
+
     private Set<OntologyMeta> singletonSet(OntologyMeta wrapper) {
         return Collections.singleton(wrapper);
     }

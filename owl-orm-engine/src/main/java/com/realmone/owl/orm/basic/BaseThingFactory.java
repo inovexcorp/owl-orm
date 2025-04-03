@@ -14,6 +14,8 @@ import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.types.ValueConverterRegistry;
 import lombok.*;
 import org.eclipse.rdf4j.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -31,6 +33,7 @@ import java.util.stream.Stream;
 @Builder
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseThingFactory implements ThingFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseThingFactory.class);
 
     @NonNull
     private final ValueConverterRegistry valueConverterRegistry;
@@ -43,12 +46,16 @@ public class BaseThingFactory implements ThingFactory {
     @Getter
     private final ValueFactory valueFactory;
 
+    private final ClassLoader[] classLoaders;
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         Set<IRI> parents = getAllExtendedOrImplementedTypesRecursively(type).stream()
-                .map(parentClazz -> getTypeAnnotation((Class<? extends Thing>) parentClazz))
+                .map(parentClazz -> optTypeAnnotation((Class<? extends Thing>) parentClazz))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(parentType -> valueFactory.createIRI(parentType.value()))
                 .collect(Collectors.toSet());
         IRI typeIri = valueFactory.createIRI(annotation.value());
@@ -65,8 +72,7 @@ public class BaseThingFactory implements ThingFactory {
                         .useCreate(true)
                         .build())
                 .build();
-        return (T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
-                new Class[]{type}, handler);
+        return createInstance(handler, type);
     }
 
     @Override
@@ -85,7 +91,6 @@ public class BaseThingFactory implements ThingFactory {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends Thing> Optional<T> get(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         IRI typeIri = valueFactory.createIRI(annotation.value());
@@ -105,8 +110,7 @@ public class BaseThingFactory implements ThingFactory {
                     .useModel(model)
                     .useDelegate(delegate)
                     .build();
-            return Optional.of((T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
-                    new Class[]{type}, handler));
+            return Optional.of(createInstance(handler, type));
         }
     }
 
@@ -123,11 +127,12 @@ public class BaseThingFactory implements ThingFactory {
      * @return The {@link Type} annotation on that {@link Class} or an {@link IllegalStateException}
      */
     private static <T extends Thing> Type getTypeAnnotation(Class<T> type) {
-        Type typeAnn = type.getDeclaredAnnotation(Type.class);
-        if (typeAnn == null) {
-            throw new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName());
-        }
-        return typeAnn;
+        return optTypeAnnotation(type).orElseThrow(() ->
+                new IllegalStateException("Missing Type annotation on provided Thing subtype: " + type.getName()));
+    }
+
+    private static <T extends Thing> Optional<Type> optTypeAnnotation(Class<T> type) {
+        return Optional.ofNullable(type.getDeclaredAnnotation(Type.class));
     }
 
     /**
@@ -160,5 +165,32 @@ public class BaseThingFactory implements ThingFactory {
                         // and all the interfaces the class implements
                         Arrays.stream(clazz.getInterfaces())
                 ).flatMap(BaseThingFactory::walk));
+    }
+
+    /**
+     * Attempts to create an instance of the provided class using the provided {@link OwlOrmInvocationHandler}. Tries
+     * the provided ClassLoaders if present and falls back on the loader for the handler.
+     *
+     * @param handler The specific {@link OwlOrmInvocationHandler} to use when creating the instance
+     * @param type The type of Thing to create
+     * @return The Thing instance created
+     * @param <T> A type of Thing
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends Thing> T createInstance(OwlOrmInvocationHandler handler, Class<T> type) {
+        if (classLoaders != null) {
+            LOGGER.trace("Trying to create an instance of {} using provided class loaders", type);
+            for (ClassLoader classLoader: classLoaders) {
+                String id = String.valueOf(System.identityHashCode(classLoader));
+                try {
+                    LOGGER.trace("Trying class loader {}", id);
+                    return (T) Proxy.newProxyInstance(classLoader, new Class[]{type}, handler);
+                } catch (IllegalArgumentException ex) {
+                    LOGGER.trace("Could not create instance with class loader {}", id);
+                }
+            }
+        }
+        return (T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
+                new Class[]{type}, handler);
     }
 }

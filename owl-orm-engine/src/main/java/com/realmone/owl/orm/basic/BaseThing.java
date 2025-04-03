@@ -33,11 +33,6 @@ import java.util.Set;
 public class BaseThing implements Thing {
 
     /**
-     * The {@link ValueFactory} for working with RDF {@link Value} data.
-     */
-    protected static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
-
-    /**
      * The {@link Resource} identifier for this {@link Thing}.
      */
     @Getter
@@ -116,7 +111,7 @@ public class BaseThing implements Thing {
      */
     @Override
     public boolean setProperty(@NonNull Value value, @NonNull IRI predicate, IRI... context) {
-        // Remove other properties with same prediciate...
+        // Remove other properties with same predicate...
         model.remove(getResource(), predicate, null, context);
         return model.add(getResource(), predicate, value, context);
 

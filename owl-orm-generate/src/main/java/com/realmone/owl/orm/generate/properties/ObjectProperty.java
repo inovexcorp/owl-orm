@@ -14,11 +14,16 @@ import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JVar;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.eclipse.rdf4j.model.Resource;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Data
@@ -34,12 +39,66 @@ public class ObjectProperty extends Property {
 
     @Override
     public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
-
+        addGetResourceMethod(jDefinedClass);
+        addSetResourceMethod(jDefinedClass);
+        if (!functional) {
+            createAddRemoveMethod(jDefinedClass, true);
+            createAddRemoveMethod(jDefinedClass, false);
+        }
     }
 
     private static JClass identifyRange(ClosureIndex closureIndex, Resource rangeIri, JCodeModel codeModel)
             throws OrmGenerationException {
         return closureIndex.findClassReference(rangeIri)
                 .orElseGet(() -> codeModel.ref(Thing.class));
+    }
+
+    private void addGetResourceMethod(JDefinedClass jDefinedClass) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC,
+                functional ? jCodeModel.ref(Optional.class).narrow(jCodeModel.ref(Resource.class))
+                        : jCodeModel.ref(Set.class).narrow(jCodeModel.ref(Resource.class)),
+        String.format("get%s_resource", javaName));
+        annotateMethod(method, targetRange.dotclass());
+        JDocComment docs = method.javadoc();
+
+        docs.add(functional ? String.format("<p>Get resource value for functional property <b>%s</b>.</p><br/>",
+                resource.stringValue())
+                : String.format("<p>Get resource values for non-functional property <b>%s</b>.</p><br/>",
+                resource.stringValue()));
+        docs.add(commentContext);
+        docs.addReturn().add(functional ? "The optional resource value of the data from the underlying graph model."
+                : "The set of resource values from the underlying graph model");
+    }
+
+    private void addSetResourceMethod(JDefinedClass jDefinedClass) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s_resource", javaName));
+        JVar parameter = method.param(functional ? jCodeModel.ref(Resource.class) : jCodeModel.ref(Set.class)
+                        .narrow(jCodeModel.ref(Resource.class)), functional ? "value" : "values");
+        annotateMethod(method, targetRange.dotclass());
+        JDocComment docs = method.javadoc();
+        docs.add(functional ? String.format("<p>Set the resource value for functional property <b>%s</b>.</p><br/>",
+                resource.stringValue())
+                : String.format("<p>Get resource values for non-functional property <b>%s</b>.</p><br/>",
+                resource.stringValue()));
+        docs.add(commentContext);
+        docs.addParam(parameter).add(functional ? "The resource value to set the property to for this instance"
+                : "The set of resource values to associate with this property for this instance");
+    }
+
+    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s_resource", add ? "addTo"
+                : "removeFrom", javaName));
+        JVar parameter = method.param(jCodeModel.ref(Resource.class), add ? "toAdd" : "toRemove");
+        annotateMethod(method, targetRange.dotclass());
+        JDocComment docs = method.javadoc();
+        docs.add(add ? String.format("<p>Add a resource value to the set underneath non-functional property <b>%s</b>.</p><br>",
+                resource.stringValue())
+                : String.format("<p>Remove a resource value from the set underneath non-functional property <b>%s</b>.</p><br>",
+                resource.stringValue()));
+        docs.add(commentContext);
+        docs.addParam(parameter).add(add ? "The resource value to add to the property to for this instance"
+                : "The resource value to remove from the property to for this instance");
+        docs.addReturn().add(add ? "Whether the new resource value was added to the set of data"
+                : "Whether the resource value was removed from the set of data");
     }
 }
