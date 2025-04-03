@@ -7,6 +7,7 @@
  */
 package com.realmone.owl.orm;
 
+import com.realmone.owl.orm.annotations.Type;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -19,6 +20,7 @@ import java.util.Set;
  * A class that represents a owl Thing. Basically a base structure for all things in the
  * owl ontology universe to extend.
  */
+@Type("http://www.w3.org/2002/07/owl#Thing")
 public interface Thing {
 
     /**
