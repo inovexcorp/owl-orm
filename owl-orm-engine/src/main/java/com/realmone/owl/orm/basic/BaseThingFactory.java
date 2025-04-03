@@ -187,7 +187,6 @@ public class BaseThingFactory implements ThingFactory {
                     return (T) Proxy.newProxyInstance(classLoader, new Class[]{type}, handler);
                 } catch (IllegalArgumentException ex) {
                     LOGGER.trace("Could not create instance with class loader {}", id);
-                    ex.printStackTrace();
                 }
             }
         }

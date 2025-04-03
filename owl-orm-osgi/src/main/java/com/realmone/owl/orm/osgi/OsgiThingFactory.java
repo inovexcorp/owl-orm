@@ -36,7 +36,6 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +53,7 @@ import java.util.stream.StreamSupport;
 
 @Component(
         immediate = true,
-        service = OsgiThingFactory.class
+        service = { ThingFactory.class, OsgiThingFactory.class }
 )
 public class OsgiThingFactory implements ThingFactory {
     private static final Logger LOG = LoggerFactory.getLogger(OsgiThingFactory.class);
@@ -112,7 +111,7 @@ public class OsgiThingFactory implements ThingFactory {
         LOG.debug("Registering ORM class {} with IRI {}", clazz.getCanonicalName(), classIRI);
         this.index.putIfAbsent(classIRI, clazz);
         LOG.debug("Updating parent map");
-        getParents(clazz).forEach(parent -> {
+        getParentClasses(clazz).forEach(parent -> {
             LOG.trace("Identified parent {}", parent);
             parentChildMap.computeIfAbsent(parent, k -> new HashSet<>()).add(clazz);
         });
@@ -122,7 +121,7 @@ public class OsgiThingFactory implements ThingFactory {
         LOG.debug("Unregistering ORM class IRI {}", classIRI);
         if (this.index.containsKey(classIRI)) {
             Class<? extends Thing> clazz = this.index.get(classIRI);
-            getParents(this.index.get(classIRI)).forEach(parent -> {
+            getParentClasses(this.index.get(classIRI)).forEach(parent -> {
                 if (parentChildMap.containsKey(parent) && parentChildMap.get(parent).contains(clazz)) {
                     LOG.trace("Removing {} as child of {}", clazz, parent);
                     parentChildMap.get(parent).remove(clazz);
@@ -151,14 +150,21 @@ public class OsgiThingFactory implements ThingFactory {
             return Collections.emptyList();
         }
         return parentChildMap.get(clazz).stream()
-                .filter(childClazz -> childClazz.isAssignableFrom(clazz))
+                .filter(clazz::isAssignableFrom)
                 .map(childClazz -> (Class<? extends T>) childClazz)
-                .sorted((clazz1, clazz2) -> getParents(clazz2).size() - getParents(clazz1).size())
+                .sorted((clazz1, clazz2) -> getParentClasses(clazz2).size() - getParentClasses(clazz1).size())
+                .collect(Collectors.toList());
+    }
+
+    public List<Class<? extends Thing>> getParents(Class<? extends Thing> clazz) {
+        return getParentClasses(clazz).stream()
+                .filter(parent -> getTypeAnnotation(parent).isPresent())
+                .sorted((clazz1, clazz2) -> getParentClasses(clazz2).size() - getParentClasses(clazz1).size())
                 .collect(Collectors.toList());
     }
 
     public <T extends Thing> Optional<Class<? extends T>> getSpecificType(T thing) {
-        List<IRI> types = convertIteratorToStream(thing.getModel().getStatements(null, RDF.TYPE, null).iterator())
+        List<IRI> types = thing.getModel().filter(null, RDF.TYPE, null).stream()
                 .map(Statement::getObject)
                 .filter(Value::isIRI)
                 .map(value -> (IRI) value)
@@ -168,11 +174,22 @@ public class OsgiThingFactory implements ThingFactory {
         return types.stream()
                 .map(this::getClass)
                 .filter(Objects::nonNull)
-                .peek(clazz -> parents.addAll(getParents(clazz)))
+                .peek(clazz -> parents.addAll(getParentClasses(clazz)))
                 .filter(clazz -> !parents.contains(clazz))
                 .filter(clazz -> clazz.isAssignableFrom(thing.getClass()))
-                .min((clazz1, clazz2) -> getParents(clazz2).size() - getParents(clazz1).size())
+                .min((clazz1, clazz2) -> getParentClasses(clazz2).size() - getParentClasses(clazz1).size())
                 .map(clazz -> (Class<? extends T>) clazz);
+    }
+
+    public  <T extends Thing> List<Class<? extends T>> getTypes(Resource id, Model model, Class<T> clazz) {
+        List<IRI> types = model.filter(id, RDF.TYPE, null).stream()
+                .map(Statement::getObject)
+                .filter(Value::isIRI)
+                .map(value -> (IRI) value)
+                .toList();
+        return Stream.concat(this.getChildren(clazz).stream(), Stream.of(clazz))
+                .filter(type -> types.contains(this.getIRI(type)))
+                .collect(Collectors.toList());
     }
 
     public <T extends Thing> Optional<Type> getTypeAnnotation(Class<T> type) {
@@ -241,12 +258,12 @@ public class OsgiThingFactory implements ThingFactory {
                 .build();
     }
 
-    private <T extends Thing> Set<Class<? extends Thing>> getParents(Class<T> clazz) {
+    private <T extends Thing> Set<Class<? extends Thing>> getParentClasses(Class<T> clazz) {
         if (clazz == Thing.class) {
             return Collections.emptySet();
         }
-        return Arrays.stream(clazz.getInterfaces())
-                .filter(parent -> parent != null && parent != Thing.class && Thing.class.isAssignableFrom(parent))
+        return BaseThingFactory.walk(clazz)
+                .filter(parent -> parent != null && parent != Thing.class && !parent.equals(clazz) && Thing.class.isAssignableFrom(parent))
                 .map(parent -> (Class<? extends Thing>) parent)
                 .collect(Collectors.toSet());
     }

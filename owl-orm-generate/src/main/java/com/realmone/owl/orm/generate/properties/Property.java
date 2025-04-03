@@ -65,11 +65,10 @@ public abstract class Property {
         createGetter(jDefinedClass);
         createSetter(jDefinedClass);
         createClearOutMethod(jDefinedClass);
-        // addTo, removeFrom, clearOut on non-functional fields
+        // addTo and removeFrom on non-functional fields
         if (!functional) {
             createAddRemoveMethod(jDefinedClass, true);
             createAddRemoveMethod(jDefinedClass, false);
-//            createClearOutMethod(jDefinedClass);
         }
         additionalAttach(jDefinedClass);
     }
@@ -134,7 +133,7 @@ public abstract class Property {
         docs.addReturn().add("Whether elements were cleared out");
     }
 
-    private void annotateMethod(JMethod method, JExpression rangeClass) {
+    protected void annotateMethod(JMethod method, JExpression rangeClass) {
         method.annotate(jCodeModel.ref(com.realmone.owl.orm.annotations.Property.class))
                 .param("value", resource.stringValue())
                 .param("functional", functional)

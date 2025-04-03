@@ -1,11 +1,14 @@
 package com.realmone.owl.orm.osgi;
 
 import com.realmone.owl.orm.Thing;
+import com.realmone.owl.orm.ThingFactory;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +23,10 @@ public class ORMActivator {
     List<Class<? extends Thing>> ormClasses = new ArrayList<>();
 
     @Reference
-    protected OsgiThingFactory thingFactoryProvider;
+    protected OsgiThingFactory thingFactory;
 
-    protected void start(BundleContext bundleContext) throws Exception {
-        LOG.debug("Starting ORM Activator");
+    protected void start(BundleContext bundleContext) {
+        LOG.debug("Starting ORM Activator for {}", bundleContext.getBundle().getSymbolicName());
         Dictionary<String, String> headers = bundleContext.getBundle().getHeaders();
         String ormClasses = headers.get("ORM-Classes");
         if (ormClasses != null) {
@@ -34,8 +37,8 @@ public class ORMActivator {
                     if (clazz.isInterface() && Thing.class.isAssignableFrom(clazz)) {
                         Class<? extends Thing> ormClass = (Class<? extends Thing>) clazz;
                         this.ormClasses.add(ormClass);
-                        thingFactoryProvider.getTypeAnnotation(ormClass).ifPresent(type ->
-                                thingFactoryProvider.addClass(vf.createIRI(type.value()), ormClass));
+                        thingFactory.getTypeAnnotation(ormClass).ifPresent(type ->
+                                thingFactory.addClass(vf.createIRI(type.value()), ormClass));
                     } else {
                         LOG.trace("Class {} is not an ORM class", className);
                     }
@@ -47,15 +50,16 @@ public class ORMActivator {
             LOG.debug("No ORM-Classes Manifest header found");
         }
 
-        thingFactoryProvider.addClassLoader(bundleContext.getBundle().adapt(BundleWiring.class).getClassLoader());
+        LOG.debug("Adding BundleClassLoader");
+        thingFactory.addClassLoader(bundleContext.getBundle().adapt(BundleWiring.class).getClassLoader());
     }
 
-    protected void stop(BundleContext bundleContext) throws Exception {
+    protected void stop(BundleContext bundleContext) {
         LOG.debug("Stopping ORM Activator");
         ormClasses.forEach(ormClass ->
-                thingFactoryProvider.getTypeAnnotation(ormClass).ifPresent(type ->
-                        thingFactoryProvider.removeClass(vf.createIRI(type.value()))));
+                thingFactory.getTypeAnnotation(ormClass).ifPresent(type ->
+                        thingFactory.removeClass(vf.createIRI(type.value()))));
         ormClasses.clear();
-        thingFactoryProvider.removeClassLoader(bundleContext.getBundle().adapt(BundleWiring.class).getClassLoader());
+        thingFactory.removeClassLoader(bundleContext.getBundle().adapt(BundleWiring.class).getClassLoader());
     }
 }
