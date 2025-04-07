@@ -9,16 +9,25 @@ package com.realmone.owl.orm.generate;
 
 import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
+import com.realmone.owl.orm.VocabularyIRIs;
 import com.realmone.owl.orm.annotations.Type;
 import com.realmone.owl.orm.generate.properties.DatatypeProperty;
 import com.realmone.owl.orm.generate.properties.ObjectProperty;
 import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.realmone.owl.orm.generate.support.NamingUtilities;
-import com.sun.codemodel.*;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JPackage;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
@@ -33,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 public class GeneratingOntology extends AbstractOntology {
@@ -103,7 +113,11 @@ public class GeneratingOntology extends AbstractOntology {
                 .map(this::toResource).forEach(imports::add);
         // Add all class resources to our index.
         // TODO - RDFS.CLASS support?
-        classIris.addAll(model.filter(null, RDF.TYPE, OWL.CLASS).subjects());
+        classIris.addAll(model.filter(null, RDF.TYPE, OWL.CLASS).subjects()
+                .stream()
+                .filter(Resource::isIRI) // Don't create interfaces for blank node classes (usually Restrictions)
+                .collect(Collectors.toSet())
+        );
         // Build our hierarchy index map.
         classIris.forEach(classResource -> {
             classIndex.put(classResource, generateInterface(classResource));
@@ -115,8 +129,16 @@ public class GeneratingOntology extends AbstractOntology {
             try {
                 JDefinedClass clazz = (JDefinedClass) classIndex.get(classResource);
                 // Add the type IRI/resource to the class as a static field
-                clazz.field(JMod.STATIC, String.class, "TYPE", JExpr.lit(classResource.stringValue()))
-                        .javadoc().add("The String value of the rdf:type IRI that identifies this class.");
+                clazz.field(JMod.STATIC, String.class, "TYPE_STR", JExpr.lit(classResource.stringValue()))
+                        .javadoc().add("The String value of the rdf:type that identifies this class.");
+                if (classResource.isIRI()) {
+                    IRI classIRI = (IRI) classResource;
+                    clazz.field(JMod.STATIC, IRI.class, "TYPE", jPackage.owner().ref(VocabularyIRIs.class)
+                                    .staticInvoke("createIRI")
+                                    .arg(classIRI.getNamespace())
+                                    .arg(classIRI.getLocalName()))
+                            .javadoc().add("The IRI value of the rdf:type that identifies this class.");
+                }
                 parents.forEach(parentResource -> {
                     JClass ref = findClassReference(parentResource)
                             //TODO - better error message

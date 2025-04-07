@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ModelFactory;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
 import org.eclipse.rdf4j.model.impl.ValidatingValueFactory;
@@ -29,6 +30,7 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Slf4j
@@ -84,7 +86,8 @@ public class TestGeneratingOntology {
                 .useOntologyName("BierOnto")
                 .useReferenceModel(referenceModel)
                 .build();
-        int classCount = model.filter(null, RDF.TYPE, OWL.CLASS).size();
+        int classCount = model.filter(null, RDF.TYPE, OWL.CLASS).subjects().stream()
+                .filter(Resource::isIRI).collect(Collectors.toSet()).size();
         Assert.assertEquals("Expected one generated class per ontology",
                 classCount, ontology.getClassIris().size());
         Assert.assertEquals("Expected bieronto ontology IRI did not match",
