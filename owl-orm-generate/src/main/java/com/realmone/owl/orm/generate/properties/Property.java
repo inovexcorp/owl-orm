@@ -10,7 +10,14 @@ package com.realmone.owl.orm.generate.properties;
 import com.realmone.owl.orm.VocabularyIRIs;
 import com.realmone.owl.orm.generate.ClosureIndex;
 import com.realmone.owl.orm.generate.OrmGenerationException;
-import com.sun.codemodel.*;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JExpression;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JVar;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -58,11 +65,10 @@ public abstract class Property {
         createGetter(jDefinedClass);
         createSetter(jDefinedClass);
         createClearOutMethod(jDefinedClass);
-        // addTo, removeFrom, clearOut on non-functional fields
+        // addTo and removeFrom on non-functional fields
         if (!functional) {
             createAddRemoveMethod(jDefinedClass, true);
             createAddRemoveMethod(jDefinedClass, false);
-//            createClearOutMethod(jDefinedClass);
         }
         additionalAttach(jDefinedClass);
     }
@@ -127,7 +133,7 @@ public abstract class Property {
         docs.addReturn().add("Whether elements were cleared out");
     }
 
-    private void annotateMethod(JMethod method, JExpression rangeClass) {
+    protected void annotateMethod(JMethod method, JExpression rangeClass) {
         method.annotate(jCodeModel.ref(com.realmone.owl.orm.annotations.Property.class))
                 .param("value", resource.stringValue())
                 .param("functional", functional)

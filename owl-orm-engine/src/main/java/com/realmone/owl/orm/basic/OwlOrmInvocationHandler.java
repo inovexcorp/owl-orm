@@ -46,6 +46,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     private static final String ADDTO_PREFIX = "addTo";
     private static final String REMOVEFROM_PREFIX = "removeFrom";
     private static final String CLEAROUT_PREFIX = "clearOut";
+    private static final String RESOURCE_SUFFIX = "_resource";
 
     /** RDF model that serves as the data store for the proxy object. */
     private final Model model;
@@ -117,6 +118,10 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     private Optional<Object> useDelegateMethod(Method method, Object[] args) {
         if (method.getDeclaringClass().equals(Thing.class) || method.getDeclaringClass().equals(Object.class)) {
             try {
+                if (method.getReturnType().equals(void.class)) {
+                    method.invoke(delegate, args);
+                    return Optional.of(true);
+                }
                 return Optional.of(method.invoke(delegate, args));
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new IllegalStateException("Issue reflecting method call to delegate underlying Thing", e);
@@ -146,22 +151,29 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         }
         // If we're intercepting a normal OWL ORM accessor method.
         if (isNormalAccessor(method, methodArgs)) {
-            return propertyAnn.functional() ? getFunctionalPropertyValue(predicate, type)
-                    : getNonFunctionalPropertyValue(predicate, type);
+            Class<?> typeToReturn = isResourceAccessor(method, methodArgs) ? Resource.class : type;
+            return propertyAnn.functional() ? getFunctionalPropertyValue(predicate, typeToReturn)
+                    : getNonFunctionalPropertyValue(predicate, typeToReturn);
         }
         // Else if we're intercepting a normal OWL ORM modifier method.
         else if (isNormalModifier(method, methodArgs)) {
+            Class<?> typeToReturn = isResourceModifier(method, methodArgs) ? Resource.class : type;
             if (propertyAnn.functional()) {
-                setFunctionalPropertyValue(predicate, type, methodArgs);
+                setFunctionalPropertyValue(predicate, typeToReturn, methodArgs);
             } else {
-                setNonFunctionalPropertyValue(predicate, type, methodArgs);
+                setNonFunctionalPropertyValue(predicate, typeToReturn, methodArgs);
             }
             // Normal modifiers are of void return types.
             return null;
         }
+        // Else if we're intercepting an OWL ORM clear out method for both functional and non-functional.
+        else if (isClearOut(method, methodArgs)) {
+            return this.delegate.clearProperty(predicate);
+        }
         // Else if we're working on a non-functional add/remove/clear method.
         else if (isNonFunctionalAddRemove(method, methodArgs)) {
-            return interceptNonFunctionalModifier(type, propertyAnn, predicate, method, methodArgs);
+            Class<?> typeToReturn = isResourceModifier(method, methodArgs) ? Resource.class : type;
+            return interceptNonFunctionalModifier(typeToReturn, propertyAnn, predicate, method, methodArgs);
         }
         // Else it is unclear what type of method we're intercepting... raise an exception!
         else {
@@ -178,14 +190,10 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         }
         // Else we're truly operating on a non-functional property.
         else {
-            if (method.getName().startsWith(CLEAROUT_PREFIX)) {
-                return this.delegate.clearProperty(predicate);
+            if (method.getName().startsWith(ADDTO_PREFIX)) {
+                return add(type, args[0], predicate);
             } else {
-                if (method.getName().startsWith(ADDTO_PREFIX)) {
-                    return add(type, args[0], predicate);
-                } else {
-                    return remove(type, args[0], predicate);
-                }
+                return remove(type, args[0], predicate);
             }
         }
     }
@@ -236,6 +244,15 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         }
     }
 
+    private boolean isResourceAccessor(Method m, Object[] args) {
+        String name = m.getName();
+        return name.endsWith(RESOURCE_SUFFIX) && argsEmpty(args);
+    }
+
+    private boolean isResourceModifier(Method m, Object[] args) {
+        String name = m.getName();
+        return name.endsWith(RESOURCE_SUFFIX) && !argsEmpty(args);
+    }
 
     private boolean isNormalAccessor(Method m, Object[] args) {
         //TODO - validate assumptions...
@@ -250,11 +267,15 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         return name.startsWith(SET_PREFIX) && !argsEmpty(args);
     }
 
+    private boolean isClearOut(Method m, Object[] args) {
+        String name = m.getName();
+        return name.startsWith(CLEAROUT_PREFIX) && argsEmpty(args);
+    }
+
     private boolean isNonFunctionalAddRemove(Method m, Object[] args) {
         //TODO - validate assumptions...
         String name = m.getName();
-        return ((name.startsWith(ADDTO_PREFIX) || name.startsWith(REMOVEFROM_PREFIX))
-                && !argsEmpty(args)) || (name.startsWith(CLEAROUT_PREFIX) && argsEmpty(args));
+        return (name.startsWith(ADDTO_PREFIX) || name.startsWith(REMOVEFROM_PREFIX)) && !argsEmpty(args);
     }
 
     @SuppressWarnings("unchecked")
@@ -276,7 +297,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     private <T> Set<T> getNonFunctionalPropertyValue(IRI predicate, Class<T> type) {
         if (Thing.class.isAssignableFrom(type)) {
             return (Set<T>) delegate.getProperties(predicate).stream()
-                    .map(getRequiredValueConverter(IRI.class)::convertValue)
+                    .map(getRequiredValueConverter(Resource.class)::convertValue)
                     .map(iri -> thingFactory.get((Class<? extends Thing>) type, iri, delegate.getModel())
                             .orElseThrow(() -> new OrmException("Couldn't get thing for IRI in underlying model: "
                                     + iri)))
