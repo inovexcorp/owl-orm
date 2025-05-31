@@ -38,12 +38,12 @@ public class ObjectProperty extends Property {
     }
 
     @Override
-    public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
-        addGetResourceMethod(jDefinedClass);
-        addSetResourceMethod(jDefinedClass);
+    public void additionalAttach(JDefinedClass jDefinedClass, String suffix) throws OrmGenerationException {
+        addGetResourceMethod(jDefinedClass, suffix);
+        addSetResourceMethod(jDefinedClass, suffix);
         if (!functional) {
-            createAddRemoveMethod(jDefinedClass, true);
-            createAddRemoveMethod(jDefinedClass, false);
+            createAddRemoveMethod(jDefinedClass, true, suffix);
+            createAddRemoveMethod(jDefinedClass, false, suffix);
         }
     }
 
@@ -53,11 +53,11 @@ public class ObjectProperty extends Property {
                 .orElseGet(() -> codeModel.ref(Thing.class));
     }
 
-    private void addGetResourceMethod(JDefinedClass jDefinedClass) {
+    private void addGetResourceMethod(JDefinedClass jDefinedClass, String suffix) {
         JMethod method = jDefinedClass.method(JMod.PUBLIC,
                 functional ? jCodeModel.ref(Optional.class).narrow(jCodeModel.ref(Resource.class))
                         : jCodeModel.ref(Set.class).narrow(jCodeModel.ref(Resource.class)),
-        String.format("get%s_resource", javaName));
+        String.format("get%s%s_resource", javaName, suffix));
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
 
@@ -70,8 +70,9 @@ public class ObjectProperty extends Property {
                 : "The set of resource values from the underlying graph model");
     }
 
-    private void addSetResourceMethod(JDefinedClass jDefinedClass) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s_resource", javaName));
+    private void addSetResourceMethod(JDefinedClass jDefinedClass, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s%s_resource", javaName,
+                suffix));
         JVar parameter = method.param(functional ? jCodeModel.ref(Resource.class) : jCodeModel.ref(Set.class)
                         .narrow(jCodeModel.ref(Resource.class)), functional ? "value" : "values");
         annotateMethod(method, targetRange.dotclass());
@@ -85,9 +86,9 @@ public class ObjectProperty extends Property {
                 : "The set of resource values to associate with this property for this instance");
     }
 
-    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s_resource", add ? "addTo"
-                : "removeFrom", javaName));
+    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s%s_resource", add ? "addTo"
+                : "removeFrom", javaName, suffix));
         JVar parameter = method.param(jCodeModel.ref(Resource.class), add ? "toAdd" : "toRemove");
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();

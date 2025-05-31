@@ -46,39 +46,41 @@ public abstract class Property {
     protected Set<Resource> domain;
     protected String commentContext;
 
-    protected abstract void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException;
+    protected abstract void additionalAttach(JDefinedClass jDefinedClass, String suffix) throws OrmGenerationException;
 
     public void attach(JDefinedClass jDefinedClass) throws OrmGenerationException {
         // Add IRI field
-        if (resource.isIRI()) {
-            IRI propIRI = (IRI) resource;
+        int counter = 0;
+        if (resource instanceof IRI propIRI) {
             String staticFieldName = javaName.toUpperCase();
-            if (jDefinedClass.fields().containsKey(staticFieldName)) {
-                staticFieldName += "1";
+            while (jDefinedClass.fields().containsKey(staticFieldName + getSuffix(counter))) {
+                counter++;
             }
-            jDefinedClass.field(JMod.STATIC, IRI.class, staticFieldName, jCodeModel.ref(VocabularyIRIs.class).staticInvoke("createIRI")
-                            .arg(propIRI.getNamespace())
-                            .arg(propIRI.getLocalName()))
+            staticFieldName += getSuffix(counter);
+            jDefinedClass.field(JMod.STATIC, IRI.class, staticFieldName,
+                            jCodeModel.ref(VocabularyIRIs.class).staticInvoke("createIRI").arg(propIRI.getNamespace())
+                                    .arg(propIRI.getLocalName()))
                     .javadoc().add("The IRI value of the " + resource + " property");
         }
+        String suffix = getSuffix(counter);
         // Build methods...
-        createGetter(jDefinedClass);
-        createSetter(jDefinedClass);
-        createClearOutMethod(jDefinedClass);
+        createGetter(jDefinedClass, suffix);
+        createSetter(jDefinedClass, suffix);
+        createClearOutMethod(jDefinedClass, suffix);
         // addTo and removeFrom on non-functional fields
         if (!functional) {
-            createAddRemoveMethod(jDefinedClass, true);
-            createAddRemoveMethod(jDefinedClass, false);
+            createAddRemoveMethod(jDefinedClass, true, suffix);
+            createAddRemoveMethod(jDefinedClass, false, suffix);
         }
-        additionalAttach(jDefinedClass);
+        additionalAttach(jDefinedClass, suffix);
     }
 
-    private void createGetter(JDefinedClass jDefinedClass) {
+    private void createGetter(JDefinedClass jDefinedClass, String suffix) {
         JMethod method = jDefinedClass.method(JMod.PUBLIC,
                 functional ? jCodeModel.ref(Optional.class).narrow(targetRange)
                         : jCodeModel.ref(Set.class).narrow(targetRange),
-                String.format("%s%s", functional && targetRange.fullName().equals(Boolean.class.getName()) ? "is"
-                        : "get", javaName));
+                String.format("%s%s%s", functional && targetRange.fullName().equals(Boolean.class.getName()) ? "is"
+                        : "get", javaName, suffix));
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
 
@@ -91,8 +93,8 @@ public abstract class Property {
                 : "The set of values from the underlying graph model");
     }
 
-    private void createSetter(JDefinedClass jDefinedClass) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s", javaName));
+    private void createSetter(JDefinedClass jDefinedClass, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s%s", javaName, suffix));
         JVar parameter = method.param(functional ? targetRange : jCodeModel.ref(Set.class).narrow(targetRange),
                 functional ? "value" : "values");
         annotateMethod(method, targetRange.dotclass());
@@ -106,9 +108,9 @@ public abstract class Property {
                 : "The set of values to associate with this property for this instance");
     }
 
-    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s", add ? "addTo"
-                : "removeFrom", javaName));
+    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s%s", add ? "addTo"
+                : "removeFrom", javaName, suffix));
         JVar parameter = method.param(targetRange, add ? "toAdd" : "toRemove");
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
@@ -123,8 +125,9 @@ public abstract class Property {
                 : "Whether the value was removed from the set of data");
     }
 
-    public void createClearOutMethod(JDefinedClass jDefinedClass) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("clearOut%s", javaName));
+    public void createClearOutMethod(JDefinedClass jDefinedClass, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("clearOut%s%s", javaName,
+                suffix));
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
         docs.add(String.format("<p>Clear out all values associated with property <b>%s</b>.</p><br>",
@@ -138,5 +141,9 @@ public abstract class Property {
                 .param("value", resource.stringValue())
                 .param("functional", functional)
                 .param("type", rangeClass);
+    }
+
+    private String getSuffix(int counter) {
+        return counter == 0 ? "" : String.valueOf(counter);
     }
 }
