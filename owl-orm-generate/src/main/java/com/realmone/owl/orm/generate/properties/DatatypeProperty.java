@@ -39,7 +39,7 @@ public class DatatypeProperty extends Property {
     }
 
     @Override
-    public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
+    public void additionalAttach(JDefinedClass jDefinedClass, String suffix) throws OrmGenerationException {
 
 
     }
