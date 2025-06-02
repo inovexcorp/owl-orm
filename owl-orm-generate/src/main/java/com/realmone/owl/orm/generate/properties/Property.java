@@ -7,6 +7,7 @@
  */
 package com.realmone.owl.orm.generate.properties;
 
+import com.realmone.owl.orm.VocabularyIRIs;
 import com.realmone.owl.orm.generate.ClosureIndex;
 import com.realmone.owl.orm.generate.OrmGenerationException;
 import com.sun.codemodel.JClass;
@@ -21,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,27 +46,42 @@ public abstract class Property {
     protected Set<Resource> domain;
     protected String commentContext;
 
-    protected abstract void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException;
+    protected abstract void additionalAttach(JDefinedClass jDefinedClass, String suffix) throws OrmGenerationException;
 
     public void attach(JDefinedClass jDefinedClass) throws OrmGenerationException {
+        // Add IRI field
+        int counter = 0;
+        if (resource instanceof IRI propIRI) {
+            String staticFieldName = javaName.toUpperCase();
+            while (jDefinedClass.fields().containsKey(staticFieldName + getSuffix(counter))) {
+                counter++;
+            }
+            staticFieldName += getSuffix(counter);
+            jDefinedClass.field(JMod.STATIC, IRI.class, staticFieldName,
+                            jCodeModel.ref(VocabularyIRIs.class).staticInvoke("createIRI").arg(propIRI.getNamespace())
+                                    .arg(propIRI.getLocalName()))
+                    .javadoc().add("The IRI value of the " + resource + " property");
+        }
+        String suffix = getSuffix(counter);
         // Build methods...
-        createGetter(jDefinedClass);
-        createSetter(jDefinedClass);
+        createGetter(jDefinedClass, suffix);
+        createSetter(jDefinedClass, suffix);
+        createClearOutMethod(jDefinedClass, suffix);
         // addTo, removeFrom, clearOut on non-functional fields
         if (!functional) {
-            createAddRemoveMethod(jDefinedClass, true);
-            createAddRemoveMethod(jDefinedClass, false);
-            createClearOutMethod(jDefinedClass);
+            createAddRemoveMethod(jDefinedClass, true, suffix);
+            createAddRemoveMethod(jDefinedClass, false, suffix);
+//            createClearOutMethod(jDefinedClass);
         }
-        additionalAttach(jDefinedClass);
+        additionalAttach(jDefinedClass, suffix);
     }
 
-    private void createGetter(JDefinedClass jDefinedClass) {
+    private void createGetter(JDefinedClass jDefinedClass, String suffix) {
         JMethod method = jDefinedClass.method(JMod.PUBLIC,
                 functional ? jCodeModel.ref(Optional.class).narrow(targetRange)
                         : jCodeModel.ref(Set.class).narrow(targetRange),
-                String.format("%s%s", functional && targetRange.fullName().equals(Boolean.class.getName()) ? "is"
-                        : "get", javaName));
+                String.format("%s%s%s", functional && targetRange.fullName().equals(Boolean.class.getName()) ? "is"
+                        : "get", javaName, suffix));
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
 
@@ -77,8 +94,8 @@ public abstract class Property {
                 : "The set of values from the underlying graph model");
     }
 
-    private void createSetter(JDefinedClass jDefinedClass) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s", javaName));
+    private void createSetter(JDefinedClass jDefinedClass, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.VOID, String.format("set%s%s", javaName, suffix));
         JVar parameter = method.param(functional ? targetRange : jCodeModel.ref(Set.class).narrow(targetRange),
                 functional ? "value" : "values");
         annotateMethod(method, targetRange.dotclass());
@@ -92,9 +109,9 @@ public abstract class Property {
                 : "The set of values to associate with this property for this instance");
     }
 
-    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s", add ? "addTo"
-                : "removeFrom", javaName));
+    private void createAddRemoveMethod(JDefinedClass jDefinedClass, boolean add, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("%s%s%s", add ? "addTo"
+                : "removeFrom", javaName, suffix));
         JVar parameter = method.param(targetRange, add ? "toAdd" : "toRemove");
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
@@ -105,18 +122,19 @@ public abstract class Property {
         docs.add(commentContext);
         docs.addParam(parameter).add(add ? "The value to add to the property to for this instance"
                 : "The value to remove from the property to for this instance");
-        docs.addReturn().add(add ? "Whether or not the new value was added to the set of data"
-                : "Whether or not the value was removed from the set of data");
+        docs.addReturn().add(add ? "Whether the new value was added to the set of data"
+                : "Whether the value was removed from the set of data");
     }
 
-    public void createClearOutMethod(JDefinedClass jDefinedClass) {
-        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("clearOut%s", javaName));
+    public void createClearOutMethod(JDefinedClass jDefinedClass, String suffix) {
+        JMethod method = jDefinedClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, String.format("clearOut%s%s", javaName,
+                suffix));
         annotateMethod(method, targetRange.dotclass());
         JDocComment docs = method.javadoc();
         docs.add(String.format("<p>Clear out all values associated with property <b>%s</b>.</p><br>",
                 resource.stringValue()));
         docs.add(commentContext);
-        docs.addReturn().add("Whether or not elements were cleared out");
+        docs.addReturn().add("Whether elements were cleared out");
     }
 
     private void annotateMethod(JMethod method, JExpression rangeClass) {
@@ -124,5 +142,9 @@ public abstract class Property {
                 .param("value", resource.stringValue())
                 .param("functional", functional)
                 .param("type", rangeClass);
+    }
+
+    private String getSuffix(int counter) {
+        return counter == 0 ? "" : String.valueOf(counter);
     }
 }

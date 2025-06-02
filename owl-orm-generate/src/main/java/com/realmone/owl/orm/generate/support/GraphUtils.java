@@ -67,6 +67,7 @@ public class GraphUtils {
             return model.filter(classResource, RDFS.SUBCLASSOF, null)
                     // Find the subClassOf properties
                     .objects().stream().map(Resource.class::cast)
+                    .filter(Resource::isIRI) // Ignore blank nodes (usually restrictions)
                     .filter(parentResource -> {
                         if (model.filter(parentResource, null, null).isEmpty()) {
                             String message = String.format("Searching for a parent of class %s, and couldn't find the parent class of %s",

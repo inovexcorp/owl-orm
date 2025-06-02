@@ -33,7 +33,7 @@ public class ObjectProperty extends Property {
     }
 
     @Override
-    public void additionalAttach(JDefinedClass jDefinedClass) throws OrmGenerationException {
+    public void additionalAttach(JDefinedClass jDefinedClass, String suffix) throws OrmGenerationException {
         // Intentionally left empty for this implementation of Property
     }
 
