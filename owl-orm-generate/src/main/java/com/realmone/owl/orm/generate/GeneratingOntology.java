@@ -9,20 +9,26 @@ package com.realmone.owl.orm.generate;
 
 import com.realmone.owl.orm.OrmException;
 import com.realmone.owl.orm.Thing;
+import com.realmone.owl.orm.TypeMetadata;
 import com.realmone.owl.orm.VocabularyIRIs;
 import com.realmone.owl.orm.annotations.Type;
+import com.realmone.owl.orm.basic.SimpleTypeMetadata;
 import com.realmone.owl.orm.generate.properties.DatatypeProperty;
 import com.realmone.owl.orm.generate.properties.ObjectProperty;
 import com.realmone.owl.orm.generate.support.GraphUtils;
 import com.realmone.owl.orm.generate.support.NamingUtilities;
+import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JInvocation;
+import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
+import com.sun.codemodel.JVar;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -32,6 +38,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -39,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.Generated;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,6 +70,7 @@ public class GeneratingOntology extends AbstractOntology {
     private final Model model;
     private final Map<Resource, DatatypeProperty> datatypeProperties = new HashMap<>();
     private final Map<Resource, ObjectProperty> objectProperties = new HashMap<>();
+    private final Map<Resource, JDefinedClass> typeMetadataClasses = new HashMap<>();
 
     @Builder(setterPrefix = "use")
     public GeneratingOntology(@NonNull JCodeModel codeModel, @NonNull Model ontologyModel,
@@ -257,5 +266,119 @@ public class GeneratingOntology extends AbstractOntology {
 
     private Resource toResource(Value value) {
         return (Resource) value;
+    }
+
+    /**
+     * Generates TypeMetadata implementation classes for each OWL class in this ontology.
+     * These classes implement {@link TypeMetadata} and provide static type information
+     * that can be registered with a TypeRegistry at runtime.
+     * <p>
+     * For each OWL class, generates a class like:
+     * <pre>
+     * public class FooTypeMetadata implements TypeMetadata&lt;Foo&gt; {
+     *     private static final IRI TYPE_IRI = SimpleValueFactory.getInstance().createIRI("...");
+     *     private static final Set&lt;IRI&gt; PARENT_IRIS = Set.of(...);
+     *
+     *     public Class&lt;Foo&gt; getType() { return Foo.class; }
+     *     public IRI getTypeIRI() { return TYPE_IRI; }
+     *     public Set&lt;IRI&gt; getParentTypeIRIs() { return PARENT_IRIS; }
+     * }
+     * </pre>
+     */
+    public void generateTypeMetadataClasses() {
+        classHierarchy.forEach((classResource, parents) -> {
+            JDefinedClass interfaze = (JDefinedClass) classIndex.get(classResource);
+            if (interfaze != null && classResource.isIRI()) {
+                try {
+                    JDefinedClass metadataClass = generateTypeMetadataClass(classResource, interfaze, parents);
+                    typeMetadataClasses.put(classResource, metadataClass);
+                } catch (Exception e) {
+                    log.error("Failed to generate TypeMetadata class for {}: {}", classResource, e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * Generates a TypeMetadata implementation class for a specific OWL class.
+     */
+    private JDefinedClass generateTypeMetadataClass(Resource classResource, JDefinedClass interfaze,
+                                                    Set<Resource> parents) throws JClassAlreadyExistsException {
+        String metadataClassName = interfaze.name() + "TypeMetadata";
+        JDefinedClass metadataClass = jPackage._class(JMod.PUBLIC, metadataClassName);
+
+        // Add implements TypeMetadata<InterfaceType>
+        JClass typeMetadataInterface = jPackage.owner().ref(TypeMetadata.class).narrow(interfaze);
+        metadataClass._implements(typeMetadataInterface);
+
+        // Add Generated annotation
+        metadataClass.annotate(Generated.class)
+                .param("value", SourceGenerator.class.getName())
+                .param("date", ZonedDateTime.now().toString())
+                .param("comments", String.format("TypeMetadata generated for %s", classResource.stringValue()));
+
+        // Add Javadoc
+        JDocComment javadoc = metadataClass.javadoc();
+        javadoc.add(String.format("TypeMetadata implementation for {@link %s}.%n", interfaze.name()));
+        javadoc.add("This class provides static type information for the ORM framework.");
+
+        IRI classIRI = (IRI) classResource;
+
+        // Generate: private static final IRI TYPE_IRI = SimpleValueFactory.getInstance().createIRI("...");
+        JClass simpleValueFactoryClass = jPackage.owner().ref(SimpleValueFactory.class);
+        JInvocation createTypeIRI = simpleValueFactoryClass.staticInvoke("getInstance")
+                .invoke("createIRI")
+                .arg(classIRI.stringValue());
+        metadataClass.field(JMod.PRIVATE | JMod.STATIC | JMod.FINAL, IRI.class, "TYPE_IRI", createTypeIRI);
+
+        // Generate: private static final Set<IRI> PARENT_IRIS = ...
+        JClass setClass = jPackage.owner().ref(Set.class).narrow(IRI.class);
+        JClass collectionsClass = jPackage.owner().ref(Collections.class);
+
+        if (parents.isEmpty()) {
+            // Empty set case
+            metadataClass.field(JMod.PRIVATE | JMod.STATIC | JMod.FINAL, setClass, "PARENT_IRIS",
+                    collectionsClass.staticInvoke("emptySet"));
+        } else {
+            // Build Set.of(...) invocation with parent IRIs
+            JClass setOfClass = jPackage.owner().ref(Set.class);
+            JInvocation setOfInvocation = setOfClass.staticInvoke("of");
+
+            for (Resource parent : parents) {
+                if (parent.isIRI()) {
+                    IRI parentIRI = (IRI) parent;
+                    JInvocation createParentIRI = simpleValueFactoryClass.staticInvoke("getInstance")
+                            .invoke("createIRI")
+                            .arg(parentIRI.stringValue());
+                    setOfInvocation.arg(createParentIRI);
+                }
+            }
+
+            metadataClass.field(JMod.PRIVATE | JMod.STATIC | JMod.FINAL, setClass, "PARENT_IRIS", setOfInvocation);
+        }
+
+        // Generate: public Class<InterfaceType> getType() { return InterfaceType.class; }
+        JMethod getTypeMethod = metadataClass.method(JMod.PUBLIC, jPackage.owner().ref(Class.class).narrow(interfaze), "getType");
+        getTypeMethod.annotate(Override.class);
+        getTypeMethod.body()._return(interfaze.dotclass());
+
+        // Generate: public IRI getTypeIRI() { return TYPE_IRI; }
+        JMethod getTypeIRIMethod = metadataClass.method(JMod.PUBLIC, IRI.class, "getTypeIRI");
+        getTypeIRIMethod.annotate(Override.class);
+        getTypeIRIMethod.body()._return(JExpr.ref("TYPE_IRI"));
+
+        // Generate: public Set<IRI> getParentTypeIRIs() { return PARENT_IRIS; }
+        JMethod getParentTypeIRIsMethod = metadataClass.method(JMod.PUBLIC, setClass, "getParentTypeIRIs");
+        getParentTypeIRIsMethod.annotate(Override.class);
+        getParentTypeIRIsMethod.body()._return(JExpr.ref("PARENT_IRIS"));
+
+        return metadataClass;
+    }
+
+    /**
+     * @return The map of class resources to their generated TypeMetadata classes
+     */
+    public Map<Resource, JDefinedClass> getTypeMetadataClasses() {
+        return typeMetadataClasses;
     }
 }
