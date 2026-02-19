@@ -75,9 +75,16 @@ public class GeneratorMojo extends AbstractMojo {
     }
 
     private static OntologyMeta fromOnt(Ontology ont) {
+        String name = ont.getOntologyName();
+        if (name == null || name.isEmpty()) {
+            // Derive ontology name from the file path (e.g., "/path/to/foaf.owl" -> "foaf")
+            String file = ont.getOntologyFile();
+            String baseName = file.contains("/") ? file.substring(file.lastIndexOf('/') + 1) : file;
+            name = baseName.contains(".") ? baseName.substring(0, baseName.lastIndexOf('.')) : baseName;
+        }
         return OntologyMeta.builder()
                 .file(ont.getOntologyFile())
-                .ontologyName(ont.getOntologyName())
+                .ontologyName(name)
                 .packageName(ont.getOutputPackage())
                 .build();
     }

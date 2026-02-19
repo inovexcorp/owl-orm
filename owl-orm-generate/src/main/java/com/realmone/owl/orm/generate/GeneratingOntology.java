@@ -103,20 +103,18 @@ public class GeneratingOntology extends AbstractOntology {
     private Resource getOntologyResource(Model model) {
         final Set<Resource> ontologiesInModel = model.filter(null, RDF.TYPE, OWL.ONTOLOGY).subjects();
         if (ontologiesInModel.size() > 1) {
-            throw new OrmException(String.format("More than one ontology in file '%s': %s",
-                    ontologyName, ontologiesInModel));
-        } else if (ontologiesInModel.isEmpty()) {
-            throw new OrmException(String.format("No ontology defined in file '%s'", ontologyName));
-        } else {
-            // For each ontology in the data -- should be exactly one.
-            ontologiesInModel.forEach(resource ->
-                    // Put in our index the resource of that ontology
-                    model.filter(resource, OWL.IMPORTS, null).objects().stream()
-                            // Convert from Value to Resource and add to our set.
-                            .map(this::toResource).forEach(imports::add)
-            );
-            return ontologiesInModel.stream().findFirst().orElseThrow();
+            log.warn("More than one ontology in file '{}': {} - using first one found",
+                    ontologyName, ontologiesInModel);
         }
+        if (ontologiesInModel.isEmpty()) {
+            throw new OrmException(String.format("No ontology defined in file '%s'", ontologyName));
+        }
+        // For each ontology in the data -- collect all imports.
+        ontologiesInModel.forEach(resource ->
+                model.filter(resource, OWL.IMPORTS, null).objects().stream()
+                        .map(this::toResource).forEach(imports::add)
+        );
+        return ontologiesInModel.stream().findFirst().orElseThrow();
     }
 
     private void analyzeAndGenerate() throws OrmException {

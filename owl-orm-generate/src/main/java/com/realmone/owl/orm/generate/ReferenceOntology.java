@@ -15,6 +15,7 @@ import com.sun.codemodel.JCodeModel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @Getter
 public class ReferenceOntology extends AbstractOntology {
 
@@ -41,10 +43,12 @@ public class ReferenceOntology extends AbstractOntology {
         super(sourceGenerator, codeModel, false);
         final Set<Resource> ontologiesInModel = ontologyModel.filter(null, RDF.TYPE, OWL.ONTOLOGY).subjects();
         if (ontologiesInModel.size() > 1) {
-            throw new OrmException("Ontology data contains multiple ontology definitions");
-        } else if (ontologiesInModel.isEmpty()) {
+            log.warn("Ontology data contains {} ontology definitions, using first one found", ontologiesInModel.size());
+        }
+        if (ontologiesInModel.isEmpty()) {
             throw new OrmException("Ontology data contains no ontology definition");
-        } else {
+        }
+        {
             this.ontologyResource = ontologiesInModel.stream().findFirst().orElseThrow();
             this.model = ontologyModel;
             this.packageName = packageName;
