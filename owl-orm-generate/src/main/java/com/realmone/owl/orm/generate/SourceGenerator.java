@@ -63,7 +63,8 @@ public class SourceGenerator implements Runnable {
     @Builder
     protected SourceGenerator(@NonNull Set<OntologyMeta> generateForOntologies,
                               @NonNull Set<OntologyMeta> referenceOntologies,
-                              @NonNull String outputLocation, Boolean enforceFullClosure,
+                              @NonNull String outputLocation,
+                              Boolean enforceFullClosure,
                               Boolean isolateGenerationClosures) {
         final boolean includeGeneratedOntologiesInReferences = isolateGenerationClosures == null
                 || !isolateGenerationClosures;
@@ -161,6 +162,11 @@ public class SourceGenerator implements Runnable {
      * Writes the ServiceLoader configuration file (META-INF/services/com.realmone.owl.orm.TypeMetadata)
      * containing all generated TypeMetadata class names. This enables automatic discovery of type
      * metadata using the Java ServiceLoader mechanism.
+     * <p>
+     * The file is written to the project's compiled classes output directory (e.g., target/classes)
+     * rather than the generated sources directory, so that the maven-jar-plugin will include it
+     * in the final JAR. Maven only compiles .java files from source directories and does not
+     * copy non-Java resource files like META-INF/services/ from source directories.
      */
     private void writeServiceLoaderConfig() {
         // Collect all TypeMetadata class names
@@ -176,8 +182,13 @@ public class SourceGenerator implements Runnable {
             return;
         }
 
+        // Write the ServiceLoader file to the outputLocation (generated-sources directory).
+        // The Maven plugin is responsible for registering this as a resource directory
+        // so that Maven's resource processing copies it to target/classes.
+        String serviceFileBaseDir = outputLocation;
+
         // Create META-INF/services directory
-        Path servicesDir = Path.of(outputLocation, "META-INF", "services");
+        Path servicesDir = Path.of(serviceFileBaseDir, "META-INF", "services");
         try {
             Files.createDirectories(servicesDir);
         } catch (IOException e) {

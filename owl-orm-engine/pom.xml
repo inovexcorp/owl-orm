@@ -57,7 +57,8 @@
                         <Bundle-Name>OWL ORM Engine</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.realmone.owl.orm;provide:=true
+                            com.realmone.owl.orm;provide:=true,
+                            com.realmone.owl.orm.basic;provide:=true
                         </Export-Package>
                         <build>${maven.build.timestamp}</build>
                         <_snapshot>${maven.build.timestamp}</_snapshot>

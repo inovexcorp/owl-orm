@@ -113,6 +113,11 @@ public class OsgiThingFactory implements ThingFactory {
     }
 
     @Override
+    public <T extends Thing> T wrap(Class<T> type, Resource resource, Model model) throws OrmException {
+        return delegate.wrap(type, resource, model);
+    }
+
+    @Override
     public ValueFactory getValueFactory() {
         return valueFactory;
     }

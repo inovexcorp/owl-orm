@@ -39,6 +39,9 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     /** RDF4j ValueFactory used for creating IRIs and other RDF values. */
     private static final ValueFactory VALUE_FACTORY = new ValidatingValueFactory();
 
+    /** Sentinel value indicating a void delegate method was successfully invoked (returns null to caller). */
+    private static final Object VOID_RESULT = new Object();
+
     // Method name prefixes for identifying common method types
     private static final String GET_PREFIX = "get";
     private static final String IS_PREFIX = "is";
@@ -88,7 +91,12 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             return this.toString();
         } else {
             Optional<Object> opt = useDelegateMethod(method, args);
-            return opt.orElseGet(() -> intercept(method, args));
+            if (opt.isPresent()) {
+                Object result = opt.get();
+                // VOID_RESULT sentinel indicates a void delegate method was invoked successfully
+                return result == VOID_RESULT ? null : result;
+            }
+            return intercept(method, args);
         }
     }
 
@@ -117,7 +125,10 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     private Optional<Object> useDelegateMethod(Method method, Object[] args) {
         if (method.getDeclaringClass().equals(Thing.class) || method.getDeclaringClass().equals(Object.class)) {
             try {
-                return Optional.of(method.invoke(delegate, args));
+                Object result = method.invoke(delegate, args);
+                // Void methods return null from Method.invoke; use sentinel to distinguish
+                // from Optional.empty() which means "not a delegate method"
+                return Optional.of(result == null ? VOID_RESULT : result);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new IllegalStateException("Issue reflecting method call to delegate underlying Thing", e);
             }
@@ -171,22 +182,20 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
     }
 
     private boolean interceptNonFunctionalModifier(Class<?> type, @NonNull Property propertyAnn, IRI predicate, Method method, Object[] args) throws ValueConversionException {
-        // Raise exception if we're operating on top of a functional property...
+        // clearOut is valid for both functional and non-functional properties
+        if (method.getName().startsWith(CLEAROUT_PREFIX)) {
+            return this.delegate.clearProperty(predicate);
+        }
+        // Raise exception if we're operating on top of a functional property with add/remove...
         if (propertyAnn.functional()) {
             throw new OrmException("Cannot overlay an add/remove method on a functional property\n\t"
                     + method.getName() + " - " + this);
         }
         // Else we're truly operating on a non-functional property.
-        else {
-            if (method.getName().startsWith(CLEAROUT_PREFIX)) {
-                return this.delegate.clearProperty(predicate);
-            } else {
-                if (method.getName().startsWith(ADDTO_PREFIX)) {
-                    return add(type, args[0], predicate);
-                } else {
-                    return remove(type, args[0], predicate);
-                }
-            }
+        if (method.getName().startsWith(ADDTO_PREFIX)) {
+            return add(type, args[0], predicate);
+        } else {
+            return remove(type, args[0], predicate);
         }
     }
 
@@ -264,7 +273,7 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
             // TODO - maybe pull this converter into a field?
             return (Optional<T>) delegate.getProperty(predicate)
                     .map(getRequiredValueConverter(IRI.class)::convertValue)
-                    .flatMap(iri -> thingFactory.get((Class<? extends Thing>) type, iri, delegate.getModel()));
+                    .map(iri -> getOrCreateThing((Class<? extends Thing>) type, iri, delegate.getModel()));
         }
         // Else it's a datatype property, look for the appropriate converter.
         else {
@@ -277,14 +286,23 @@ public class OwlOrmInvocationHandler implements InvocationHandler {
         if (Thing.class.isAssignableFrom(type)) {
             return (Set<T>) delegate.getProperties(predicate).stream()
                     .map(getRequiredValueConverter(IRI.class)::convertValue)
-                    .map(iri -> thingFactory.get((Class<? extends Thing>) type, iri, delegate.getModel())
-                            .orElseThrow(() -> new OrmException("Couldn't get thing for IRI in underlying model: "
-                                    + iri)))
+                    .map(iri -> getOrCreateThing((Class<? extends Thing>) type, iri, delegate.getModel()))
                     .collect(Collectors.toSet());
         } else {
             return delegate.getProperties(predicate).stream()
                     .map(getRequiredValueConverter(type)::convertValue).collect(Collectors.toSet());
         }
+    }
+
+    /**
+     * Attempts to get an existing Thing from the model, falling back to wrapping the resource
+     * in a lightweight proxy if not found as a subject. Unlike {@code thingFactory.create()},
+     * the fallback does NOT add type triples to the model — it simply creates a proxy that can
+     * be used to read (or later write) properties for the referenced resource.
+     */
+    private <T extends Thing> T getOrCreateThing(Class<T> type, IRI iri, Model model) {
+        return thingFactory.get(type, iri, model)
+                .orElseGet(() -> thingFactory.wrap(type, iri, model));
     }
 
     private <T> void setFunctionalPropertyValue(IRI predicate, Class<T> type, Object[] args) {

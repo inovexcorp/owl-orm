@@ -78,20 +78,17 @@ public class BaseThing implements Thing {
         this.parents = parents != null ? parents : new HashSet<>();
         this.typeIri = typeIri;
         this.valueConverterRegistry = registry;
-        boolean exists = !model.filter(resource, RDF.TYPE, typeIri).isEmpty();
-        if (!exists) {
-            if (create) { // If it doesn't exist and we are creating, add the statement.
-                this.model.add(resource, RDF.TYPE, typeIri);
-                this.parents.forEach(parent -> this.model.add(resource, RDF.TYPE, parent));
-            } else { // If it doesn't exist and we are not creating, note that we are detached for the facade...
+        if (create) {
+            // Ensure the type statement(s) exist in the model. If they already exist, model.add() is a no-op.
+            this.model.add(resource, RDF.TYPE, typeIri);
+            this.parents.forEach(parent -> this.model.add(resource, RDF.TYPE, parent));
+        } else {
+            // For get/existing mode: check if the resource has any statements in the model.
+            // This is lenient about type triples (doesn't require rdf:type) but still requires
+            // the resource to exist in the model as a subject.
+            if (model.filter(resource, null, null).isEmpty()) {
                 detached = true;
             }
-        } else {
-            if (create) { // If it exists and we are creating, raise an exception...
-                throw new OrmException("Cannot create an instance of '" + typeIri + "' with resource '"
-                        + resource.stringValue() + "' as it already exists in our underlying model");
-            }
-            // Just get it if it exists!
         }
     }
 
@@ -154,5 +151,25 @@ public class BaseThing implements Thing {
     @Override
     public boolean clearProperty(@NonNull IRI predicate, IRI... context) {
         return model.remove(resource, predicate, null, context);
+    }
+
+    /**
+     * Two BaseThing instances are considered equal if they share the same resource IRI.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof Thing other) {
+            return resource.equals(other.getResource());
+        }
+        return false;
+    }
+
+    /**
+     * The hashCode is based solely on the resource IRI for consistency with equals.
+     */
+    @Override
+    public int hashCode() {
+        return resource.hashCode();
     }
 }

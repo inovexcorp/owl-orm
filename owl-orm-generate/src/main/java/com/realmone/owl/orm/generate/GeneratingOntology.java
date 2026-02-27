@@ -288,13 +288,44 @@ public class GeneratingOntology extends AbstractOntology {
             JDefinedClass interfaze = (JDefinedClass) classIndex.get(classResource);
             if (interfaze != null && classResource.isIRI()) {
                 try {
-                    JDefinedClass metadataClass = generateTypeMetadataClass(classResource, interfaze, parents);
+                    // Compute transitive parents (all ancestors) for proper hierarchy depth
+                    Set<Resource> allAncestors = computeTransitiveParents(classResource);
+                    JDefinedClass metadataClass = generateTypeMetadataClass(classResource, interfaze, allAncestors);
                     typeMetadataClasses.put(classResource, metadataClass);
                 } catch (Exception e) {
                     log.error("Failed to generate TypeMetadata class for {}: {}", classResource, e.getMessage());
                 }
             }
         });
+    }
+
+    /**
+     * Computes the transitive closure of parent classes for a given class resource.
+     * This follows the rdfs:subClassOf chain through the full closure model to find all
+     * ancestors, including those from imported ontologies.
+     *
+     * @param classResource The class resource to find ancestors for
+     * @return All ancestor class resources (transitive closure of rdfs:subClassOf)
+     */
+    private Set<Resource> computeTransitiveParents(Resource classResource) {
+        Set<Resource> allParents = new java.util.HashSet<>();
+        java.util.Deque<Resource> queue = new java.util.ArrayDeque<>();
+        // Start with direct parents from the classHierarchy (which uses the closureModel)
+        Set<Resource> directParents = classHierarchy.getOrDefault(classResource, java.util.Collections.emptySet());
+        queue.addAll(directParents);
+        while (!queue.isEmpty()) {
+            Resource parent = queue.poll();
+            if (allParents.add(parent)) {
+                // Look up parents from the closure model directly for cross-ontology ancestry
+                try {
+                    Set<Resource> grandParents = GraphUtils.lookupParentClasses(closureModel, parent, false);
+                    queue.addAll(grandParents);
+                } catch (Exception e) {
+                    log.debug("Could not look up parents for {} in closure: {}", parent, e.getMessage());
+                }
+            }
+        }
+        return allParents;
     }
 
     /**

@@ -92,6 +92,21 @@ public interface ThingFactory {
     <T extends Thing> Optional<T> get(Class<T> type, String resource, Model model) throws OrmException;
 
     /**
+     * Wrap a resource in a proxy without modifying the underlying model. Unlike {@code create()},
+     * this does NOT add any type triples to the model, and unlike {@code get()}, it does not
+     * require the resource to exist as a subject in the model. This is useful for creating
+     * lightweight proxy references to Things that may or may not have full data in the model.
+     *
+     * @param type     The interface class that extends {@link Thing} that you want to work with
+     * @param resource The {@link Resource} that uniquely identifies your instance of the {@link Thing}
+     * @param model    The {@link Model} to use to underpin your {@link Thing}
+     * @param <T>      The type of {@link Thing} you want to work with
+     * @return The proxy instance of your {@link Thing}
+     * @throws OrmException If there is an issue creating the proxy
+     */
+    <T extends Thing> T wrap(Class<T> type, Resource resource, Model model) throws OrmException;
+
+    /**
      * @return The RDF4j {@link ValueFactory} backing this {@link ThingFactory}.
      */
     ValueFactory getValueFactory();
