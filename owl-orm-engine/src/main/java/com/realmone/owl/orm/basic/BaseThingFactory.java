@@ -48,8 +48,9 @@ public class BaseThingFactory implements ThingFactory {
     public <T extends Thing> T create(Class<T> type, Resource resource, Model model) throws OrmException {
         Type annotation = getTypeAnnotation(type);
         Set<IRI> parents = getAllExtendedOrImplementedTypesRecursively(type).stream()
-                .map(parentClazz -> getTypeAnnotation((Class<? extends Thing>) parentClazz))
-                .map(parentType -> valueFactory.createIRI(parentType.value()))
+                .map(parentClazz -> (Class<? extends Thing>) parentClazz)
+                .filter(parentClazz -> parentClazz.getDeclaredAnnotation(Type.class) != null)
+                .map(parentClazz -> valueFactory.createIRI(parentClazz.getDeclaredAnnotation(Type.class).value()))
                 .collect(Collectors.toSet());
         IRI typeIri = valueFactory.createIRI(annotation.value());
         OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
@@ -65,7 +66,7 @@ public class BaseThingFactory implements ThingFactory {
                         .useCreate(true)
                         .build())
                 .build();
-        return (T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
+        return (T) Proxy.newProxyInstance(type.getClassLoader(),
                 new Class[]{type}, handler);
     }
 
@@ -98,21 +99,44 @@ public class BaseThingFactory implements ThingFactory {
                 .build();
         if (delegate.isDetached()) {
             return Optional.empty();
-        } else {
-            OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
-                    .useFactory(this)
-                    .useValueConverterRegistry(valueConverterRegistry)
-                    .useModel(model)
-                    .useDelegate(delegate)
-                    .build();
-            return Optional.of((T) Proxy.newProxyInstance(OwlOrmInvocationHandler.class.getClassLoader(),
-                    new Class[]{type}, handler));
         }
+        OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
+                .useFactory(this)
+                .useValueConverterRegistry(valueConverterRegistry)
+                .useModel(model)
+                .useDelegate(delegate)
+                .build();
+        return Optional.of((T) Proxy.newProxyInstance(type.getClassLoader(),
+                new Class[]{type}, handler));
     }
 
     @Override
     public <T extends Thing> Optional<T> get(Class<T> type, String resource, Model model) throws OrmException {
         return get(type, valueFactory.createIRI(resource), model);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends Thing> T wrap(Class<T> type, Resource resource, Model model) throws OrmException {
+        Type annotation = getTypeAnnotation(type);
+        IRI typeIri = valueFactory.createIRI(annotation.value());
+        // Build a delegate that does NOT add type triples and does NOT check for existing statements.
+        // This creates a lightweight proxy reference.
+        BaseThing delegate = BaseThing.builder()
+                .useModel(model)
+                .useResource(resource)
+                .useTypeIri(typeIri)
+                .useRegistry(valueConverterRegistry)
+                .useCreate(false)
+                .build();
+        OwlOrmInvocationHandler handler = OwlOrmInvocationHandler.builder()
+                .useFactory(this)
+                .useValueConverterRegistry(valueConverterRegistry)
+                .useModel(model)
+                .useDelegate(delegate)
+                .build();
+        return (T) Proxy.newProxyInstance(type.getClassLoader(),
+                new Class[]{type}, handler);
     }
 
     /**

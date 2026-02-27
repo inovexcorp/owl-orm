@@ -7,16 +7,29 @@
         <version>0.0.9-SNAPSHOT</version>
     </parent>
 
-    <artifactId>owl-orm-engine</artifactId>
-    <name>OWL ORM Engine</name>
-    <description>The logic engine that implements the OWL ORM API</description>
+    <artifactId>owl-orm-osgi</artifactId>
+    <name>OWL ORM OSGi</name>
+    <description>OSGi service components for the OWL ORM framework, including type registry and bundle tracking</description>
     <url>https://realmone.com/foundry</url>
     <packaging>bundle</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <osgi.version>8.0.0</osgi.version>
+        <osgi.ds.version>1.5.0</osgi.ds.version>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.realmone</groupId>
             <artifactId>owl-orm-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.realmone</groupId>
+            <artifactId>owl-orm-engine</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -30,20 +43,27 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Test Dependencies -->
+        <!-- OSGi Core -->
         <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-api</artifactId>
-            <version>${rdf4j.version}</version>
-            <scope>test</scope>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <version>${osgi.version}</version>
+            <scope>provided</scope>
         </dependency>
+        <!-- OSGi Declarative Services Annotations -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <version>${osgi.ds.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- RDF4j -->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-turtle</artifactId>
+            <artifactId>rdf4j-model</artifactId>
             <version>${rdf4j.version}</version>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -54,14 +74,20 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>OWL ORM Engine</Bundle-Name>
+                        <Bundle-Name>OWL ORM OSGi</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.realmone.owl.orm;provide:=true,
-                            com.realmone.owl.orm.basic;provide:=true
+                            com.realmone.owl.orm.osgi
                         </Export-Package>
+                        <Import-Package>
+                            org.osgi.framework;version="[1.8,2)",
+                            org.osgi.util.tracker;version="[1.5,2)",
+                            org.osgi.service.component.annotations;resolution:=optional,
+                            *
+                        </Import-Package>
                         <build>${maven.build.timestamp}</build>
                         <_snapshot>${maven.build.timestamp}</_snapshot>
+                        <_dsannotations>*</_dsannotations>
                         <_dsannotations-options>inherit</_dsannotations-options>
                     </instructions>
                 </configuration>

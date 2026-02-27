@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -222,16 +223,22 @@ public class TestFactoryAndProxy {
     public void testSetFunctionalObjectToNonExist() {
         /*
         Setting a functional property to a resource that doesn't exist in the underlying model should be allowable
-        for sophisticated usages, but subsequent gets should not be able to resolve the other thing.
+        for sophisticated usages. The wrap() fallback provides a lightweight proxy for the referenced resource
+        even when it doesn't exist as a subject in the model.
          */
         IRI updatedPointsTo = VALUE_FACTORY.createIRI("urn://does.not.exist");
         // Start on our thing
         ExampleClass myThing = THING_FACTORY.get(ExampleClass.class, VALUE_FACTORY.createIRI("urn://one"), model)
                 .orElseThrow();
         myThing.setPointsTo_Resource(updatedPointsTo);
-        Assert.assertTrue("Should not be able to get an ExampleThing for a non-existant resource",
-                myThing.getPointsTo().isEmpty());
-
+        // With wrap() fallback, getPointsTo() returns a lightweight proxy even for non-existent resources
+        Optional<ExampleClass> result = myThing.getPointsTo();
+        Assert.assertTrue("Should get a wrapped proxy for a non-existent resource", result.isPresent());
+        ExampleClass wrapped = result.get();
+        Assert.assertEquals("Wrapped proxy should reference the set resource", updatedPointsTo, wrapped.getResource());
+        // The proxy has no data in the model for this resource, so getName() should be empty
+        Assert.assertTrue("Wrapped proxy should have no name since resource doesn't exist in model",
+                wrapped.getName().isEmpty());
     }
 
     @Test
